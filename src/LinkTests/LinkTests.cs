@@ -81,7 +81,7 @@ namespace LinkTests
         public void AddParameterToLink()
         {
             var link = new Link(){ Target = new Uri("http://localhost/{?foo}")};
-        link.AddParameter("foo","bar");
+        link.SetParameter("foo","bar");
             
             var client = new HttpClient(new FakeMessageHandler());
 
@@ -95,9 +95,9 @@ namespace LinkTests
         public void AddMultipleParametersToLink()
         {
             var link = new Link() { Target = new Uri("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
-            link.AddParameter("foo", "bar");
-            link.AddParameter("baz", "99");
-            link.AddParameter("dataset", "bob");
+            link.SetParameter("foo", "bar");
+            link.SetParameter("baz", "99");
+            link.SetParameter("dataset", "bob");
 
             var client = new HttpClient(new FakeMessageHandler());
 
@@ -105,6 +105,43 @@ namespace LinkTests
 
             Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", response.RequestMessage.RequestUri.AbsoluteUri);
         }
+
+
+        [Fact]
+        public void AddParameterToLinkMultipleTimes()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            link.SetParameter("foo", "bar");
+            link.SetParameter("foo", "blah");
+
+            var request = link.CreateRequest();
+
+            Assert.Equal("http://localhost/?foo=blah", request.RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void UnsetParameterInLink()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            link.SetParameter("foo", "bar");
+            link.UnsetParameter("foo");
+
+            var request = link.CreateRequest();
+
+            Assert.Equal("http://localhost/", request.RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void SetListParameterInLink()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            link.SetParameter("foo", new List<string>(){ "bar","baz","bler"});
+
+            var request = link.CreateRequest();
+
+            Assert.Equal("http://localhost/?foo=bar,baz,bler", request.RequestUri.AbsoluteUri);
+        }
+
 
     }
 

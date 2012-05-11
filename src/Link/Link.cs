@@ -101,20 +101,25 @@ namespace Tavis
             return requestMessage;
         }
 
-        public void AddParameter(string name, object value)
+        public void SetParameter(string name, object value)
         {
-            _Parameters.Add(name, value);
+            _Parameters[name] = value;
+        }
+
+        public void UnsetParameter(string name)
+        {
+            _Parameters.Remove(name);
         }
 
         private void ApplyParameters(UriTemplate uriTemplate)
         {
             foreach (var parameter in _Parameters)
             {
-                if (parameter is IEnumerable<string>)
+                if (parameter.Value is IEnumerable<string>)
                 {
                     uriTemplate.SetParameter(parameter.Key, (IEnumerable<string>)parameter.Value);
                 }
-                else if (parameter is IDictionary<string, string>)
+                else if (parameter.Value is IDictionary<string, string>)
                 {
                     uriTemplate.SetParameter(parameter.Key, (IDictionary<string, string>)parameter.Value);
                 }
@@ -124,5 +129,7 @@ namespace Tavis
                 }
             }
         }
+
+     
     }
 }
