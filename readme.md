@@ -51,6 +51,6 @@ which can then be used like this,
 	link.SetCoordinates(45,-73);
     var response = httpClient.Send(link.CreateRequest()).Result;
 
-This approach to using links to create requests gives can give the rich, domain specific programming model without obscuring the interaction model of HTTP.  
+This approach to using links to create requests can give a rich, domain specific programming model without obscuring the interaction model of HTTP.  
 
 This model of usage is extremely compatible with the use of hypermedia.  Links embedded in documents can have their ***type*** identified by the link relation and the link objects can be deserialized from the returned representations.  Following a link in a document becomes as simple as getting a reference to the link object, calling CreateRequest and passing that to the send method of HttpClient.
