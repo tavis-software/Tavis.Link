@@ -143,6 +143,18 @@ namespace LinkTests
         }
 
 
+        [Fact]
+        public void ExecutePublicWebUrl()
+        {
+            var link = new BingMapLink();
+            link.SetCoordinates(45,-73);
+
+            var request = link.CreateRequest();
+
+            Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
+        }
+
+
     }
 
     public class FakeMessageHandler : HttpMessageHandler
@@ -153,5 +165,28 @@ namespace LinkTests
             tcs.SetResult(new HttpResponseMessage() {RequestMessage =  request});
             return tcs.Task;
         }
+    }
+
+
+    public class BingMapLink : Link {
+
+        public BingMapLink()
+        {
+            Target = new Uri("http://www.bing.com/maps/?v=2&cp={lat}~{long}&lvl={level}");
+            SetParameter("level", 10);
+        }
+
+        public void SetCoordinates(double latitude, double longitude)
+        {
+            SetParameter("lat", latitude.ToString());
+            SetParameter("long", longitude.ToString());
+        }
+       
+        public void SetLevel(int level)
+        {
+            SetParameter("level", level.ToString());
+        }
+
+	
     }
 }
