@@ -77,9 +77,7 @@ namespace Tavis
             Uri resolvedTarget = Target;
             if (Target.OriginalString.Contains("{"))
             {
-                var uriTemplate = new UriTemplate(Target.OriginalString);
-                ApplyParameters(uriTemplate);
-                resolvedTarget = new Uri(uriTemplate.Resolve(),UriKind.RelativeOrAbsolute);
+                resolvedTarget = GetResolvedTarget();
             }
             var requestMessage = new HttpRequestMessage()
                                      {
@@ -100,6 +98,22 @@ namespace Tavis
 
             return requestMessage;
         }
+
+        public IEnumerable<string> GetParameterNames()
+        {
+            var uriTemplate = new UriTemplate(Target.OriginalString);
+            return uriTemplate.GetParameterNames();
+        }
+
+        public Uri GetResolvedTarget()
+        {
+            
+            var uriTemplate = new UriTemplate(Target.OriginalString);
+            ApplyParameters(uriTemplate);
+            var resolvedTarget = new Uri(uriTemplate.Resolve(),UriKind.RelativeOrAbsolute);
+            return resolvedTarget;
+        }
+
 
         public void SetParameter(string name, object value)
         {

@@ -99,12 +99,27 @@ namespace LinkTests
             link.SetParameter("baz", "99");
             link.SetParameter("dataset", "bob");
 
-            var client = new HttpClient(new FakeMessageHandler());
-
-            var response = client.SendAsync(link.CreateRequest()).Result;
-
-            Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", response.RequestMessage.RequestUri.AbsoluteUri);
+            var uri = link.GetResolvedTarget();
+            
+            Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", uri.AbsoluteUri);
         }
+
+
+        [Fact]
+        public void IdentifyParametersInTemplate()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
+
+            var parameters = link.GetParameterNames();
+
+            Assert.Equal(4, parameters.Count());
+            Assert.True(parameters.Contains("dataset"));
+            Assert.True(parameters.Contains("foo"));
+            Assert.True(parameters.Contains("bar"));
+            Assert.True(parameters.Contains("baz"));
+        }
+
+
 
 
         [Fact]
@@ -186,7 +201,5 @@ namespace LinkTests
         {
             SetParameter("level", level.ToString());
         }
-
-	
     }
 }

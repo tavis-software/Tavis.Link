@@ -58,6 +58,16 @@ namespace Tavis
                 _Parameters[name] = value;
             }
 
+            private List<string> _ParameterNames;
+            public IEnumerable<string> GetParameterNames()
+            {
+                var parameterNames = new List<string>();
+                _ParameterNames = parameterNames;
+                Resolve();
+                _ParameterNames = null;
+                return parameterNames;
+            }
+
             public string Resolve()
             {
                 var currentState = States.CopyingLiterals;
@@ -165,6 +175,8 @@ namespace Tavis
             private void ProcessVariable(VarSpec varSpec)
             {
                 var varname = varSpec.VarName.ToString();
+                if (_ParameterNames != null) _ParameterNames.Add(varname);
+
                 if (_Parameters.ContainsKey(varname))
                 {
                     if (varSpec.First)
