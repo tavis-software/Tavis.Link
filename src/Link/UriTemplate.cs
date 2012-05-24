@@ -43,6 +43,12 @@ namespace Tavis
                 _template = template;
             }
 
+
+            public void SetParameter(string name, object value)
+            {
+                _Parameters[name] = value;
+            }
+
             public void SetParameter(string name, string value)
             {
                 _Parameters[name] = value;
@@ -57,6 +63,8 @@ namespace Tavis
             {
                 _Parameters[name] = value;
             }
+
+
 
             private List<string> _ParameterNames;
             public IEnumerable<string> GetParameterNames()
@@ -155,13 +163,12 @@ namespace Tavis
                             i--;
                             break;
                         case ',':
-                            ProcessVariable(varSpec);
-
+                            var success = ProcessVariable(varSpec);
+                            bool isFirst = varSpec.First;
                             // Reset for new variable
-                            varSpec = new VarSpec(op)
-                            {
-                                First = false
-                            };
+                            varSpec = new VarSpec(op);
+                            if (success || !isFirst) varSpec.First = false;
+                    
                             break;
                         default:
                             varSpec.VarName.Append(currentChar);
@@ -172,65 +179,68 @@ namespace Tavis
 
             }
 
-            private void ProcessVariable(VarSpec varSpec)
+            private bool ProcessVariable(VarSpec varSpec)
             {
                 var varname = varSpec.VarName.ToString();
                 if (_ParameterNames != null) _ParameterNames.Add(varname);
 
-                if (_Parameters.ContainsKey(varname))
+                if (!_Parameters.ContainsKey(varname) 
+                        || _Parameters[varname] == null 
+                        || (_Parameters[varname] is IList && ((IList)_Parameters[varname]).Count == 0)
+                        || (_Parameters[varname] is IDictionary && ((IDictionary)_Parameters[varname]).Count == 0)) return false;
+
+                if (varSpec.First)
                 {
-                    if (varSpec.First)
-                    {
-                        _Result.Append(varSpec.OperatorInfo.First);
-                    }
-                    else
-                    {
-                        _Result.Append(varSpec.OperatorInfo.Seperator);
-                    }
+                    _Result.Append(varSpec.OperatorInfo.First);
+                }
+                else
+                {
+                    _Result.Append(varSpec.OperatorInfo.Seperator);
+                }
 
-                    object value = _Parameters[varname];
+                object value = _Parameters[varname];
 
-                    // Handle Strings
-                    if (value is string)
+                // Handle Strings
+                if (value is string)
+                {
+                    var stringValue = (string)value;
+                    if (varSpec.OperatorInfo.Named)
                     {
-                        var stringValue = (string)value;
-                        if (varSpec.OperatorInfo.Named)
+                        AppendName(varname, varSpec.OperatorInfo, string.IsNullOrEmpty(stringValue));
+                    }
+                    AppendValue(stringValue, varSpec.PrefixLength, varSpec.OperatorInfo.AllowReserved);
+                }
+                else
+                {
+                    // Handle Lists
+                    var list = value as IEnumerable<string>;
+                    if (list != null)
+                    {
+                        if (varSpec.OperatorInfo.Named && !varSpec.Explode)  // exploding will prefix with list name
                         {
-                            AppendName(varname, varSpec.OperatorInfo, string.IsNullOrEmpty(stringValue));
+                            AppendName(varname, varSpec.OperatorInfo, list.Count() == 0);
                         }
-                        AppendValue(stringValue, varSpec.PrefixLength, varSpec.OperatorInfo.AllowReserved);
+
+                        AppendList(varSpec.OperatorInfo, varSpec.Explode, varname, list);
                     }
                     else
                     {
-                        // Handle Lists
-                        var list = value as IEnumerable<string>;
-                        if (list != null)
+
+                        // Handle associative arrays
+                        var dictionary = value as IDictionary<string, string>;
+                        if (dictionary != null)
                         {
                             if (varSpec.OperatorInfo.Named && !varSpec.Explode)  // exploding will prefix with list name
                             {
-                                AppendName(varname, varSpec.OperatorInfo, list.Count() == 0);
+                                AppendName(varname, varSpec.OperatorInfo, dictionary.Count() == 0);
                             }
-
-                            AppendList(varSpec.OperatorInfo, varSpec.Explode, varname, list);
-                        }
-                        else
-                        {
-
-                            // Handle associative arrays
-                            var dictionary = value as IDictionary<string, string>;
-                            if (dictionary != null)
-                            {
-                                if (varSpec.OperatorInfo.Named && !varSpec.Explode)  // exploding will prefix with list name
-                                {
-                                    AppendName(varname, varSpec.OperatorInfo, dictionary.Count() == 0);
-                                }
-                                AppendDictionary(varSpec.OperatorInfo, varSpec.Explode, dictionary);
-                            }
-
+                            AppendDictionary(varSpec.OperatorInfo, varSpec.Explode, dictionary);
                         }
 
                     }
+
                 }
+                return true;
             }
 
 

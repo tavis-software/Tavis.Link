@@ -136,63 +136,63 @@ namespace LinkTests
             /// <param name="expectedURI"></param>
 
             [Theory]
-            // String expansion with value modifiers
-            [InlineData("{var:3}", "val")]
-            [InlineData("{var:30}", "value")]
+            //// String expansion with value modifiers
+            //[InlineData("{var:3}", "val")]
+            //[InlineData("{var:30}", "value")]
             [InlineData("{list}", "red,green,blue")]
-            [InlineData("{list*}", "red,green,blue")]
-            [InlineData("{keys}", "semi,%3B,dot,.,comma,%2C")]
-            [InlineData("{keys*}", "semi=%3B,dot=.,comma=%2C")]
+            //[InlineData("{list*}", "red,green,blue")]
+            //[InlineData("{keys}", "semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("{keys*}", "semi=%3B,dot=.,comma=%2C")]
 
-            // Reserved expansion with value modifiers
-            [InlineData("{+path:6}/here", "/foo/b/here")]
-            [InlineData("{+list}", "red,green,blue")]
-            [InlineData("{+list*}", "red,green,blue")]
-            [InlineData("{+keys}", "semi,;,dot,.,comma,,")]
-            [InlineData("{+keys*}", "semi=;,dot=.,comma=,")]
+            //// Reserved expansion with value modifiers
+            //[InlineData("{+path:6}/here", "/foo/b/here")]
+            //[InlineData("{+list}", "red,green,blue")]
+            //[InlineData("{+list*}", "red,green,blue")]
+            //[InlineData("{+keys}", "semi,;,dot,.,comma,,")]
+            //[InlineData("{+keys*}", "semi=;,dot=.,comma=,")]
 
-            // Fragment expansion with value modifiers
-            [InlineData("{#path:6}/here", "#/foo/b/here")]
-            [InlineData("{#list}", "#red,green,blue")]
-            [InlineData("{#list*}", "#red,green,blue")]
-            [InlineData("{#keys}", "#semi,;,dot,.,comma,,")]
-            [InlineData("{#keys*}", "#semi=;,dot=.,comma=,")]
+            //// Fragment expansion with value modifiers
+            //[InlineData("{#path:6}/here", "#/foo/b/here")]
+            //[InlineData("{#list}", "#red,green,blue")]
+            //[InlineData("{#list*}", "#red,green,blue")]
+            //[InlineData("{#keys}", "#semi,;,dot,.,comma,,")]
+            //[InlineData("{#keys*}", "#semi=;,dot=.,comma=,")]
 
-            // Label expansion, dot-prefixed
-            [InlineData("X{.var:3}", "X.val")]
-            [InlineData("X{.list}", "X.red,green,blue")]
-            [InlineData("X{.list*}", "X.red.green.blue")]
-            [InlineData("X{.keys}", "X.semi,%3B,dot,.,comma,%2C")]
-            [InlineData("X{.keys*}", "X.semi=%3B.dot=..comma=%2C")]
+            //// Label expansion, dot-prefixed
+            //[InlineData("X{.var:3}", "X.val")]
+            //[InlineData("X{.list}", "X.red,green,blue")]
+            //[InlineData("X{.list*}", "X.red.green.blue")]
+            //[InlineData("X{.keys}", "X.semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("X{.keys*}", "X.semi=%3B.dot=..comma=%2C")]
 
-            // Path segments, slash-prefixed 
-            [InlineData("{/var:1,var}", "/v/value")]
-            [InlineData("{/list}", "/red,green,blue")]
-            [InlineData("{/list*}", "/red/green/blue")]
-            [InlineData("{/list*,path:4}", "/red/green/blue/%2Ffoo")]
-            [InlineData("{/keys}", "/semi,%3B,dot,.,comma,%2C")]
-            [InlineData("{/keys*}", "/semi=%3B/dot=./comma=%2C")]
+            //// Path segments, slash-prefixed 
+            //[InlineData("{/var:1,var}", "/v/value")]
+            //[InlineData("{/list}", "/red,green,blue")]
+            //[InlineData("{/list*}", "/red/green/blue")]
+            //[InlineData("{/list*,path:4}", "/red/green/blue/%2Ffoo")]
+            //[InlineData("{/keys}", "/semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("{/keys*}", "/semi=%3B/dot=./comma=%2C")]
 
-            // Path-style parameters, semicolon-prefixed
-            [InlineData("{;hello:5}", ";hello=Hello")]
-            [InlineData("{;list}", ";list=red,green,blue")]
-            [InlineData("{;list*}", ";list=red;list=green;list=blue")]
-            [InlineData("{;keys}", ";keys=semi,%3B,dot,.,comma,%2C")]
-            [InlineData("{;keys*}", ";semi=%3B;dot=.;comma=%2C")]
+            //// Path-style parameters, semicolon-prefixed
+            //[InlineData("{;hello:5}", ";hello=Hello")]
+            //[InlineData("{;list}", ";list=red,green,blue")]
+            //[InlineData("{;list*}", ";list=red;list=green;list=blue")]
+            //[InlineData("{;keys}", ";keys=semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("{;keys*}", ";semi=%3B;dot=.;comma=%2C")]
 
-            // Form-style query, ampersand-separated 
-            [InlineData("{?var:3}", "?var=val")]
-            [InlineData("{?list}", "?list=red,green,blue")]
-            [InlineData("{?list*}", "?list=red&list=green&list=blue")]
-            [InlineData("{?keys}", "?keys=semi,%3B,dot,.,comma,%2C")]
-            [InlineData("{?keys*}", "?semi=%3B&dot=.&comma=%2C")]
+            //// Form-style query, ampersand-separated 
+            //[InlineData("{?var:3}", "?var=val")]
+            //[InlineData("{?list}", "?list=red,green,blue")]
+            //[InlineData("{?list*}", "?list=red&list=green&list=blue")]
+            //[InlineData("{?keys}", "?keys=semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("{?keys*}", "?semi=%3B&dot=.&comma=%2C")]
 
-            // Form-style query continuation
-            [InlineData("{&var:3}", "&var=val")]
-            [InlineData("{&list}", "&list=red,green,blue")]
-            [InlineData("{&list*}", "&list=red&list=green&list=blue")]
-            [InlineData("{&keys}", "&keys=semi,%3B,dot,.,comma,%2C")]
-            [InlineData("{&keys*}", "&semi=%3B&dot=.&comma=%2C")]
+            //// Form-style query continuation
+            //[InlineData("{&var:3}", "&var=val")]
+            //[InlineData("{&list}", "&list=red,green,blue")]
+            //[InlineData("{&list*}", "&list=red&list=green&list=blue")]
+            //[InlineData("{&keys}", "&keys=semi,%3B,dot,.,comma,%2C")]
+            //[InlineData("{&keys*}", "&semi=%3B&dot=.&comma=%2C")]
 
             public void Level4Tests(string templateValue, string expectedURI)
             {
@@ -223,6 +223,7 @@ namespace LinkTests
                 Assert.Equal("http://example.org/foo/yo/baz", uriString);
             }
 
+
             [Fact]
             public void ShouldAllowUriTemplateWithMultiplePathSegmentParameter()
             {
@@ -246,10 +247,31 @@ namespace LinkTests
             public void ShouldAllowUriTemplateWithQueryParamsWithOneValue()
             {
                 var template = new UriTemplate("http://example.org/foo{?bar,baz}");
-                template.SetParameter("bar", "yo");
+                template.SetParameter("baz", "yo");
 
                 var uriString = template.Resolve();
-                Assert.Equal("http://example.org/foo?bar=yo", uriString);
+                Assert.Equal("http://example.org/foo?baz=yo", uriString);
+            }
+
+
+            [Fact]
+            public void LabelExpansionWithDotPrefixAndEmptyKeys()
+            {
+                var template = new UriTemplate("X{.empty_keys}");
+                template.SetParameter("empty_keys", new Dictionary<string,string>());
+                var uriString = template.Resolve();
+                Assert.Equal("X", uriString);
+            }
+
+            [Fact]
+            public void ShouldAllowListAndSingleValueInQueryParam()
+            {
+                var template = new UriTemplate("http://example.org{/id*}{?fields,token}");
+                template.SetParameter("id", new List<string>() { "person", "albums" });
+                template.SetParameter("fields", new List<string>() { "id", "name", "picture" });
+                template.SetParameter("token", "12345");
+                var uriString = template.Resolve();
+                Assert.Equal("http://example.org/person/albums?fields=id,name,picture&token=12345", uriString);
             }
 
 
@@ -292,6 +314,8 @@ namespace LinkTests
             }
 
 
+
+          
 
         }
     }
