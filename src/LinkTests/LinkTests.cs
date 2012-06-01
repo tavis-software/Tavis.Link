@@ -170,6 +170,17 @@ namespace LinkTests
         }
 
 
+        //[Fact]
+        //public void ODataLink()
+        //{
+        //    var link = new Link();
+        //    link.Target = new Uri("http://localhost/api/products{?$filter,");
+
+        //    var request = link.CreateRequest();
+
+        //    Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
+        //}
+
     }
 
     public class FakeMessageHandler : HttpMessageHandler
