@@ -169,6 +169,20 @@ namespace LinkTests
             Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
         }
 
+        //[Fact]
+        //public void TestTranslateLink()
+        //{
+        //    var link = new TranslationLink();
+        //    link.SetParameters("en","fr","Credit Limit");
+
+        //    var request = link.CreateRequest();
+
+        //    var httpClient = new HttpClient();
+        //    var response = httpClient.SendAsync(request).Result;
+        //    var responseText = response.Content.ReadAsStringAsync().Result;
+        //    Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", responseText);
+        //}
+
 
         //[Fact]
         //public void ODataLink()
@@ -181,6 +195,19 @@ namespace LinkTests
         //    Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
         //}
 
+    }
+
+    public class TranslationLink : Link {
+
+        public TranslationLink() {
+            Target = new Uri("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&tl={tolanguage}&q={fromphrase}");
+        }
+
+        public void SetParameters(string fromLanguage, string toLanguage, string fromPhrase) {
+            SetParameter("fromlanguage",fromLanguage);
+            SetParameter("tolanguage", toLanguage);
+            SetParameter("fromphrase", fromPhrase);
+        }
     }
 
     public class FakeMessageHandler : HttpMessageHandler
