@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Tavis
 {
+    /// <summary>
+    /// This interface can be implemented by media type parsers to provide a generic way to access links in a representation
+    /// </summary>
     public interface ILinkExtractor
     {
             Type SupportedType { get; }

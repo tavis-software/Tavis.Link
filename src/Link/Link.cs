@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using Tavis.UriTemplates;
 
 namespace Tavis
@@ -20,11 +23,12 @@ namespace Tavis
       
         // TargetAttributes
         public string Anchor { get;  set; }
-        public string Rev { get;  set; }
+        public string Rev { get;  set; }  //Deprecated byRFC5988
         public string Title { get;  set; }
-        public string HrefLang { get;  set; }
+        public Encoding TitleEncoding { get; set; }  // Title in alternate character set - See RFC 5987
+        public List<CultureInfo> HrefLang { get;  private set; }  // More than one of these should be supported
         public string Media { get;  set; }
-        public string Type { get;  set; }
+        public MediaTypeHeaderValue Type { get;  set; }
 
         public string GetLinkExtension(string name)
         {
@@ -35,7 +39,12 @@ namespace Tavis
             _LinkExtensions[name] = value;
         }
 
-        private readonly Dictionary<string, string> _LinkExtensions = new Dictionary<string, string>();
+        protected readonly Dictionary<string, string> _LinkExtensions = new Dictionary<string, string>();
+
+        public LinkRfc() {
+            TitleEncoding = Encoding.ASCII;
+            HrefLang = new List<CultureInfo>();
+        }
     }
 
 
@@ -52,6 +61,8 @@ namespace Tavis
         public HttpMethod Method { get; set; }
         public HttpContent Content { get; set; }
 
+        public IHttpResponseHandler HttpResponseHandler { get; set; }
+
         // This allows Request headers to be set and re-used for multiple requests.  Current a HttpRequestMessage can only be used once. 
         public HttpRequestHeaders RequestHeaders
         {
@@ -67,12 +78,12 @@ namespace Tavis
             
         }
 
-        public Link()
+        public Link() : base()
         {
             Method = HttpMethod.Get;
         }
 
-        public HttpRequestMessage CreateRequest()
+        public virtual HttpRequestMessage CreateRequest()
         {
             Uri resolvedTarget = Target;
             if (Target.OriginalString.Contains("{"))
@@ -95,10 +106,22 @@ namespace Tavis
             }
             
             requestMessage.Headers.Referrer = Context;
-
+            
             return requestMessage;
         }
 
+        public Task<HttpResponseMessage> HandleResponseAsync(HttpResponseMessage responseMessage)
+        {
+            if (HttpResponseHandler != null)
+            {
+                return HttpResponseHandler.HandleAsync(this, responseMessage);
+            }
+            var tcs = new TaskCompletionSource<HttpResponseMessage>();
+            tcs.SetResult(responseMessage);
+            return tcs.Task;
+        }
+
+    
         public IEnumerable<string> GetParameterNames()
         {
             var uriTemplate = new UriTemplate(Target.OriginalString);
@@ -144,6 +167,74 @@ namespace Tavis
             }
         }
 
-     
+        public void AddAsLinkHeader(HttpHeaders headers) {
+            var headerValue = GetLinkHeader();
+            headers.Add("Link",headerValue);
+        }
+
+        public string GetLinkHeader() {
+            var headerValue = new StringBuilder();
+            headerValue.Append("<");
+            headerValue.Append(Target.OriginalString);
+            headerValue.Append(">");
+            
+
+            if (!String.IsNullOrEmpty(Relation)){
+                headerValue.Append(";").AppendKey("rel").AppendQuotedString(Relation);
+            }
+            if (!String.IsNullOrEmpty(Anchor)) {
+                headerValue.Append(";").AppendKey("anchor").AppendQuotedString(Anchor);
+            }
+            if (!String.IsNullOrEmpty(Rev)) {
+                headerValue.Append(";").AppendKey("rev").AppendQuotedString(Rev);
+            }
+            foreach (var cultureInfo in HrefLang) {
+                if (cultureInfo != null)
+                {
+                    headerValue.Append(";").AppendKey("hreflang").Append(cultureInfo.Name);
+                }    
+            }
+            
+            if (!String.IsNullOrEmpty(Media)) {
+                headerValue.Append(";").AppendKey("media").AppendQuotedString(Media);
+            }
+            if (!String.IsNullOrEmpty(Title)) {
+                headerValue.Append(";").AppendKey("title").AppendQuotedString(Title);
+            }
+            if (Type != null) {
+                headerValue.Append(";").AppendKey("type").AppendQuotedString(Type.MediaType);
+            }
+
+            foreach (var linkExtension in _LinkExtensions) {
+                headerValue.Append(";").AppendKey(linkExtension.Key).AppendQuotedString(linkExtension.Value);
+            }
+            return headerValue.ToString();
+        }
+
+        public IList<Link> ParseLinkHeader(string linkHeader)
+        {
+            var parser = new LinkHeaderParser();
+            return parser.Parse(Target, linkHeader) ;
+        }
+
+    }
+
+
+    public static class StringBuilderExtensions {
+
+        public static StringBuilder AppendQuotedString(this StringBuilder builder, string value)
+        {
+            builder.Append('"');
+            builder.Append(value);
+            builder.Append('"');
+            return builder;
+        }
+        public static StringBuilder AppendKey(this StringBuilder builder, string key)
+        {
+            builder.Append(key);
+            builder.Append("=");
+            return builder;
+        }
+
     }
 }

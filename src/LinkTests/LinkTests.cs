@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -77,6 +78,23 @@ namespace LinkTests
             Assert.Equal("http://localhost/", response.RequestMessage.RequestUri.AbsoluteUri);
         }
 
+
+        [Fact]
+        public void FollowLink()
+        {
+            var link = new Link { Target = new Uri("Http://localhost") };
+            var client = new HttpClient(new FakeMessageHandler());
+
+            var uri = string.Empty;
+            link.HttpResponseHandler = new ActionResponseHandler(r => uri = r.RequestMessage.RequestUri.AbsoluteUri);
+            var task = client.FollowLinkAsync(link);
+
+            task.Wait();
+
+            Assert.Equal("http://localhost/", uri);
+        }
+
+
         [Fact]
         public void AddParameterToLink()
         {
@@ -146,6 +164,8 @@ namespace LinkTests
             Assert.Equal("http://localhost/", request.RequestUri.AbsoluteUri);
         }
 
+
+        
         [Fact]
         public void SetListParameterInLink()
         {
@@ -155,6 +175,36 @@ namespace LinkTests
             var request = link.CreateRequest();
 
             Assert.Equal("http://localhost/?foo=bar,baz,bler", request.RequestUri.AbsoluteUri);
+        }
+
+        [Fact]
+        public void CreateLinkHeader()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            Assert.Equal("<http://localhost/{?foo}>", link.GetLinkHeader());
+        }
+
+        [Fact]
+        public void CreateLinkHeaderWithRelation()
+        {
+            var link = new Link() { Target = new Uri("http://localhost/{?foo}"),
+                Relation = "related",
+                Title = "foo"
+            };
+            Assert.Equal("<http://localhost/{?foo}>;rel=\"related\";title=\"foo\"", link.GetLinkHeader());
+        }
+
+        [Fact]
+        public void CreateLinkHeaderWithMediaTypeAndLanguages()
+        {
+            var link = new Link()
+            {
+                Target = new Uri("http://localhost/{?foo}"),
+                Type = new MediaTypeHeaderValue("application/foo")
+            };
+            link.HrefLang.Add(new CultureInfo("en-GB"));
+            link.HrefLang.Add(new CultureInfo("en-CA"));
+            Assert.Equal("<http://localhost/{?foo}>;hreflang=en-GB;hreflang=en-CA;type=\"application/foo\"", link.GetLinkHeader());
         }
 
 
@@ -168,6 +218,8 @@ namespace LinkTests
 
             Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
         }
+
+
 
         //[Fact]
         //public void TestTranslateLink()

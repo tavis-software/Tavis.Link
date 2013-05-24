@@ -2,10 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>0.1.9</version>
+    <version>0.3.0</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
+    <releaseNotes>Changed signature of responseHandlers.  Added LinkRegistry with IANA types.</releaseNotes>
+    <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
       <dependency id="Tavis.UriTemplates" version="0.1.1" />
 	  <dependency id="Microsoft.Net.Http" version="2.0.20710.0" />

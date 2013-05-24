@@ -40,6 +40,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AntiXssLibrary">
+      <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net40\AntiXssLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlSanitizationLibrary">
+      <HintPath>..\..\packages\AntiXSS.4.2.1\lib\net40\HtmlSanitizationLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -58,8 +64,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HttpClientExtensions.cs" />
+    <Compile Include="DelegatingResponseHandler.cs" />
+    <Compile Include="IANA\Links.cs" />
+    <Compile Include="IHttpResponseHandler.cs" />
     <Compile Include="ILinkExtractor.cs" />
     <Compile Include="Link.cs" />
+    <Compile Include="LinkExtensions.cs" />
+    <Compile Include="LinkHeaderParser.cs" />
+    <Compile Include="LinkRegistry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
