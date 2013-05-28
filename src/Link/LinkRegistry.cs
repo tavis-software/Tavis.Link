@@ -9,6 +9,7 @@ namespace Tavis
     public class LinkRegistry
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly List<IHttpResponseHandler> _GlobalResponseHandlers = new List<IHttpResponseHandler>();
 
         public LinkRegistry()
         {
@@ -93,24 +94,43 @@ namespace Tavis
             var reg = _LinkRegistry[t.Relation];
             reg.ResponseHandlers.Add(handler);
         }
+
+        public void AddGlobalHandler(IHttpResponseHandler handler) 
+        {
+            _GlobalResponseHandlers.Add(handler);
+        }
+
+        public Link CreateLink(string relation)
+        {
+            var reg = _LinkRegistry[relation];
+            var t = Activator.CreateInstance(reg.LinkType) as Link;
+            SetupHandlers(reg, t);
+            return t;
+
+        }
         
-        public T CreateLink<T>()  where T : Link, new()
+        public T CreateLink<T>() where T : Link, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
+            SetupHandlers(reg, t);
+            return t;
+
+        }
+
+        private static void SetupHandlers(LinkRegistration reg, Link t)
+        {
             if (reg.ResponseHandlers.Count == 1)
             {
-                t.HttpResponseHandler = reg.ResponseHandlers.First();  // Must be just a IHttpResponseHandler
+                t.HttpResponseHandler = reg.ResponseHandlers.First(); // Must be just a IHttpResponseHandler
             }
             else
             {
                 foreach (var handler in reg.ResponseHandlers)
                 {
-                    t.AddHandler((DelegatingResponseHandler)handler);
+                    t.AddHandler((DelegatingResponseHandler) handler);
                 }
             }
-            return t;
-
         }
 
     }

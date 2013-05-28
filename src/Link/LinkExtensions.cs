@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Tavis
@@ -40,5 +41,56 @@ namespace Tavis
 
             }
         }
+
+
+        public static string AsLinkHeader(this Link link)
+        {
+            var headerValue = new StringBuilder();
+            headerValue.Append("<");
+            headerValue.Append(link.Target.OriginalString);
+            headerValue.Append(">");
+
+
+            if (!String.IsNullOrEmpty(link.Relation))
+            {
+                headerValue.Append(";").AppendKey("rel").AppendQuotedString(link.Relation);
+            }
+            if (!String.IsNullOrEmpty(link.Anchor))
+            {
+                headerValue.Append(";").AppendKey("anchor").AppendQuotedString(link.Anchor);
+            }
+            if (!String.IsNullOrEmpty(link.Rev))
+            {
+                headerValue.Append(";").AppendKey("rev").AppendQuotedString(link.Rev);
+            }
+            foreach (var cultureInfo in link.HrefLang)
+            {
+                if (cultureInfo != null)
+                {
+                    headerValue.Append(";").AppendKey("hreflang").Append(cultureInfo.Name);
+                }
+            }
+
+            if (!String.IsNullOrEmpty(link.Media))
+            {
+                headerValue.Append(";").AppendKey("media").AppendQuotedString(link.Media);
+            }
+            if (!String.IsNullOrEmpty(link.Title))
+            {
+                headerValue.Append(";").AppendKey("title").AppendQuotedString(link.Title);
+            }
+            if (link.Type != null)
+            {
+                headerValue.Append(";").AppendKey("type").AppendQuotedString(link.Type.MediaType);
+            }
+
+            foreach (var linkExtension in link.LinkExtensions)
+            {
+                headerValue.Append(";").AppendKey(linkExtension.Key).AppendQuotedString(linkExtension.Value);
+            }
+            return headerValue.ToString();
+        }
+
+
     }
 }

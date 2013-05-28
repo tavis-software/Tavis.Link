@@ -19,8 +19,32 @@ namespace Tavis
                     {
                         return link.HandleResponseAsync(t.Result);
                     }
-                    return null;  // Not sure how to return the current CurrentWith task
+                    return t; 
                 }).Unwrap();
         }
+
+
+        public static Task<HttpResponseMessage> EmbedLinkAsync(this HttpClient httpClient, Link link, IEmbedTarget embedTarget)
+        {
+            return httpClient.SendAsync(link.CreateRequest())
+                .ContinueWith(t =>
+                {
+                    if (t.Status == TaskStatus.RanToCompletion)
+                    {
+                        if (link.HttpResponseHandler != null)
+                        {
+                            return link.HandleResponseAsync(t.Result)
+                                       .ContinueWith(t2 =>
+                                           embedTarget.EmbedContent(link, t2.Result.Content).ContinueWith(t4 => t2.Result)
+                                         ).Unwrap();
+                        }
+                        return embedTarget.EmbedContent(link, t.Result.Content)
+                            .ContinueWith(t3 => t.Result);
+                    }
+
+                    return t;
+                }).Unwrap();
+        }
+    
     }
 }

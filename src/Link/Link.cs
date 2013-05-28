@@ -41,6 +41,8 @@ namespace Tavis
 
         protected readonly Dictionary<string, string> _LinkExtensions = new Dictionary<string, string>();
 
+        public IEnumerable<KeyValuePair<string, string>> LinkExtensions { get { return _LinkExtensions; } } 
+
         public LinkRfc() {
             TitleEncoding = Encoding.ASCII;
             HrefLang = new List<CultureInfo>();
@@ -165,75 +167,6 @@ namespace Tavis
                     uriTemplate.SetParameter(parameter.Key, parameter.Value.ToString());
                 }
             }
-        }
-
-        public void AddAsLinkHeader(HttpHeaders headers) {
-            var headerValue = GetLinkHeader();
-            headers.Add("Link",headerValue);
-        }
-
-        public string GetLinkHeader() {
-            var headerValue = new StringBuilder();
-            headerValue.Append("<");
-            headerValue.Append(Target.OriginalString);
-            headerValue.Append(">");
-            
-
-            if (!String.IsNullOrEmpty(Relation)){
-                headerValue.Append(";").AppendKey("rel").AppendQuotedString(Relation);
-            }
-            if (!String.IsNullOrEmpty(Anchor)) {
-                headerValue.Append(";").AppendKey("anchor").AppendQuotedString(Anchor);
-            }
-            if (!String.IsNullOrEmpty(Rev)) {
-                headerValue.Append(";").AppendKey("rev").AppendQuotedString(Rev);
-            }
-            foreach (var cultureInfo in HrefLang) {
-                if (cultureInfo != null)
-                {
-                    headerValue.Append(";").AppendKey("hreflang").Append(cultureInfo.Name);
-                }    
-            }
-            
-            if (!String.IsNullOrEmpty(Media)) {
-                headerValue.Append(";").AppendKey("media").AppendQuotedString(Media);
-            }
-            if (!String.IsNullOrEmpty(Title)) {
-                headerValue.Append(";").AppendKey("title").AppendQuotedString(Title);
-            }
-            if (Type != null) {
-                headerValue.Append(";").AppendKey("type").AppendQuotedString(Type.MediaType);
-            }
-
-            foreach (var linkExtension in _LinkExtensions) {
-                headerValue.Append(";").AppendKey(linkExtension.Key).AppendQuotedString(linkExtension.Value);
-            }
-            return headerValue.ToString();
-        }
-
-        public IList<Link> ParseLinkHeader(string linkHeader)
-        {
-            var parser = new LinkHeaderParser();
-            return parser.Parse(Target, linkHeader) ;
-        }
-
-    }
-
-
-    public static class StringBuilderExtensions {
-
-        public static StringBuilder AppendQuotedString(this StringBuilder builder, string value)
-        {
-            builder.Append('"');
-            builder.Append(value);
-            builder.Append('"');
-            return builder;
-        }
-        public static StringBuilder AppendKey(this StringBuilder builder, string key)
-        {
-            builder.Append(key);
-            builder.Append("=");
-            return builder;
         }
 
     }

@@ -5,19 +5,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.Security.Application;
-using Encoder = Microsoft.Security.Application.Encoder;
 
 namespace Tavis
 {
     public class LinkHeaderParser
     {
+        private readonly LinkRegistry _linkRegistry;
 
 
         public Uri BaseUrl { get; protected set; }
 
+        public LinkHeaderParser(LinkRegistry linkRegistry)
+        {
+            _linkRegistry = linkRegistry;
+        }
 
-    public IList<Link> Parse(Uri baseUrl, string linkHeader)
+        public IList<Link> Parse(Uri baseUrl, string linkHeader)
     {
       BaseUrl = baseUrl;
       InputString = linkHeader;
@@ -110,12 +113,12 @@ namespace Tavis
         }
       }
 
-        Link link = new Link() {
-            Target = new Uri(BaseUrl, url),
-            Relation = rel, 
-            Type = MediaTypeHeaderValue.Parse(type), 
-            Title=  title_s ?? title
-    };
+        Link link = _linkRegistry.CreateLink(rel);
+        link.Target = new Uri(BaseUrl, url);
+        link.Relation = rel;
+        link.Title=  title_s ?? title;
+    
+        if (!String.IsNullOrEmpty(type)) link.Type = MediaTypeHeaderValue.Parse(type);
       return link;
     }
 
