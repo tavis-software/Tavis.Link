@@ -339,7 +339,7 @@ namespace Tavis
         public string Parse(string header)
         {
      //       Condition.Requires(header, "header").IsNotNull();
-            string[] parts = header.Split(new char[] { '\'' }, 3);
+            string[] parts = header.Split(new char[] { '\'' }, StringSplitOptions.None).Take(3).ToArray();
 
             string charset = (parts.Length == 3 ? parts[0] : null);
             string language = (parts.Length == 3 ? parts[1] : null);

@@ -2,18 +2,18 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>0.3.3</version>
+    <version>0.4.0-beta</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Renamed LoadLinkAsync to EmbedLinkAsync</releaseNotes>
+    <releaseNotes>Converted to a portable class libary</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-      <dependency id="Tavis.UriTemplates" version="0.1.1" />
-	  <dependency id="Microsoft.Net.Http" version="2.0.20710.0" />
+      <dependency id="Tavis.UriTemplates" version="0.1.2-beta" />
+	  <dependency id="Microsoft.Net.Http" version="2.2.13" />
 	</dependencies>
   </metadata>
   <files>
-    <file src="..\src\Link\bin\Release\Tavis.Link.dll" target="lib\net40" />
+    <file src="..\src\Link\bin\Release\Tavis.Link.dll" target="lib\portable-win+net40+sl40+wp71" />
   </files>
 </package>

@@ -8,7 +8,7 @@ namespace Tavis
 {
     public class LinkRegistry
     {
-        private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
         private readonly List<IHttpResponseHandler> _GlobalResponseHandlers = new List<IHttpResponseHandler>();
 
         public LinkRegistry()

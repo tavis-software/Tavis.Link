@@ -44,7 +44,7 @@ namespace Tavis
         public IEnumerable<KeyValuePair<string, string>> LinkExtensions { get { return _LinkExtensions; } } 
 
         public LinkRfc() {
-            TitleEncoding = Encoding.ASCII;
+            TitleEncoding = Encoding.UTF8;  // Should be ASCII but PCL does not support ascii and UTF8 does not change ASCII values 
             HrefLang = new List<CultureInfo>();
         }
     }
