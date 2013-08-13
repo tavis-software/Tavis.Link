@@ -6,7 +6,7 @@
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Converted to a portable class libary</releaseNotes>
+    <releaseNotes>Added support for link hints</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
       <dependency id="Tavis.UriTemplates" version="0.1.2-beta" />

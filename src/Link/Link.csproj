@@ -65,7 +65,7 @@
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Tavis.UriTemplates">
-      <HintPath>..\..\packages\Tavis.UriTemplates.0.1.2\lib\Portable-Net40+WinRT45+WP71+sl4\Tavis.UriTemplates.dll</HintPath>
+      <HintPath>..\..\packages\Tavis.UriTemplates.0.1.2-beta\lib\Portable-Net40+WinRT45+WP71+sl4\Tavis.UriTemplates.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
