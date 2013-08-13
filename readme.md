@@ -33,12 +33,12 @@ Create a strongly typed link to encapsulate the parameterization of a URI
 Use standard IANA link, a responsehandler the the FollowLinkAsync extension method
     
     var httpClient = new HttpClient();
-    var linkRegistry = new LinkRegistry();
-    linkRegistry.AddGlobalHandler(new NotFoundHandler());
-    linkRegistry.AddGlobalHandler(new ServerUnavailableHandler());
-    linkRegistry.AddHandler<HelpLink>(new HelpLinkHandler());
+    var linkFactory = new LinkFactory();
+    linkFactory.AddGlobalHandler(new NotFoundHandler());
+    linkFactory.AddGlobalHandler(new ServerUnavailableHandler());
+    linkFactory.AddHandler<HelpLink>(new HelpLinkHandler());
 
-    var helpLink = linkRegistry.CreateLink<HelpLink>();  // rel="help" is an IANA standard
+    var helpLink = linkFactory.CreateLink<HelpLink>();  // rel="help" is an IANA standard
     helpLink.Target= new Uri("http://example.org/foo";
 
     httpClient.FollowLinkAsync(helpLink);  // Extension method that SendRequest and then
@@ -51,7 +51,7 @@ Add a link header to a response
 
 Consume link headers on the client
 
-     var links = response.ParseLinkHeaders(linkRegistry);
+     var links = response.ParseLinkHeaders(linkFactory);
      var aboutLink = links.Where(l => l is AboutLink).FirstOrDefault();
      
 
