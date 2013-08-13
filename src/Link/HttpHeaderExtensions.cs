@@ -32,12 +32,12 @@ namespace Tavis
 
         
         
-        public static List<Link> ParseLinkHeaders(this HttpResponseMessage responseMessage, LinkRegistry linkRegistry)
+        public static List<Link> ParseLinkHeaders(this HttpResponseMessage responseMessage, LinkFactory linkRegistry)
         {
             return ParseLinkHeaders(responseMessage.Headers, responseMessage.RequestMessage.RequestUri, linkRegistry);
         }
 
-        public static List<Link> ParseLinkHeaders(this HttpHeaders headers, Uri baseUri, LinkRegistry linkRegistry)
+        public static List<Link> ParseLinkHeaders(this HttpHeaders headers, Uri baseUri, LinkFactory linkRegistry)
         {
             var list = new List<Link>();
             var parser = new LinkHeaderParser(linkRegistry);
@@ -49,7 +49,7 @@ namespace Tavis
             return list;
         }
 
-        public static IList<Link> ParseLinkHeader(this Link link, string linkHeader, LinkRegistry linkRegistry)
+        public static IList<Link> ParseLinkHeader(this Link link, string linkHeader, LinkFactory linkRegistry)
         {
             var parser = new LinkHeaderParser(linkRegistry);
             return parser.Parse(link.Target, linkHeader);

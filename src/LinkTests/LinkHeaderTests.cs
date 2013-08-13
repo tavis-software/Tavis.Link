@@ -44,7 +44,7 @@ namespace LinkTests
         [Fact]
         public void ParseLinkHeaders()
         {
-            var linkRegistry = new LinkRegistry();
+            var linkRegistry = new LinkFactory();
             var response = new HttpResponseMessage();
             response.RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://example.org/") };
             response.Headers.AddLinkHeader(new AboutLink() { Target = new Uri("http://example.org/about") });
@@ -60,7 +60,7 @@ namespace LinkTests
         [Fact]
         public void ParseLinkHeaders2()
         {
-            var linkRegistry = new LinkRegistry();
+            var linkRegistry = new LinkFactory();
             var response = new HttpResponseMessage();
             response.RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://example.org/") };
             response.Headers.TryAddWithoutValidation("Link", "<http://example.org/about>;rel=\"about\", " 
@@ -76,7 +76,7 @@ namespace LinkTests
         [Fact]
         public void ParseLinkHeaders3()
         {
-            var linkRegistry = new LinkRegistry();
+            var linkRegistry = new LinkFactory();
             var response = new HttpResponseMessage();
             response.RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://example.org/") };
             var list = new List<Link>() { 

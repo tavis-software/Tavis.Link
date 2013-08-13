@@ -16,7 +16,7 @@ namespace LinkTests
         [Fact]
         public void CreateRegistry()
         {
-            var registry = new LinkRegistry();
+            var registry = new LinkFactory();
 
             Assert.NotNull(registry);
         }
@@ -25,7 +25,7 @@ namespace LinkTests
         [Fact]
         public void CreateAboutLink()
         {
-            var registry = new LinkRegistry();
+            var registry = new LinkFactory();
 
             var link = registry.CreateLink<AboutLink>();
 
@@ -37,7 +37,7 @@ namespace LinkTests
         {
             var foo = false;
 
-            var registry = new LinkRegistry();
+            var registry = new LinkFactory();
             registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
 
             var link = registry.CreateLink<AboutLink>();
@@ -51,7 +51,7 @@ namespace LinkTests
         {
             var foo = false;
             var bar = false;
-            var registry = new LinkRegistry();
+            var registry = new LinkFactory();
             registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
             registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => bar = true));
 

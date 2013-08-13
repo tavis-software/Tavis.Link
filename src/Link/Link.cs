@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Tavis.UriTemplates;
 
 namespace Tavis
@@ -58,12 +59,15 @@ namespace Tavis
     public class Link : LinkRfc
     {
         private HttpRequestHeaders _requestHeaders;
-        private readonly Dictionary<string, object> _Parameters = new Dictionary<string, object>();
+        private readonly Dictionary<string, LinkParameter> _Parameters = new Dictionary<string, LinkParameter>();
         
         public HttpMethod Method { get; set; }
         public HttpContent Content { get; set; }
 
         public IHttpResponseHandler HttpResponseHandler { get; set; }
+
+        public readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
+ 
 
         // This allows Request headers to be set and re-used for multiple requests.  Current a HttpRequestMessage can only be used once. 
         public HttpRequestHeaders RequestHeaders
@@ -139,10 +143,28 @@ namespace Tavis
             return resolvedTarget;
         }
 
+        public IEnumerable<LinkParameter> GetParameters()
+        {
+            return _Parameters.Values;
+        }
 
+        public void AddHint(Hint hint)
+        {
+            _Hints.Add(hint.Name, hint);
+        }
+
+        public IEnumerable<Hint> GetHints()
+        {
+            return _Hints.Values;
+        }
+
+        public void SetParameter(string name, object value, Uri identifier)
+        {
+            _Parameters[name] = new LinkParameter() { Name = name, Value = value, Identifier = identifier };
+        }
         public void SetParameter(string name, object value)
         {
-            _Parameters[name] = value;
+            _Parameters[name] = new LinkParameter() {Name = name, Value = value};
         }
 
         public void UnsetParameter(string name)
@@ -154,20 +176,29 @@ namespace Tavis
         {
             foreach (var parameter in _Parameters)
             {
-                if (parameter.Value is IEnumerable<string>)
+                if (parameter.Value.Value is IEnumerable<string>)
                 {
-                    uriTemplate.SetParameter(parameter.Key, (IEnumerable<string>)parameter.Value);
+                    uriTemplate.SetParameter(parameter.Key, (IEnumerable<string>)parameter.Value.Value);
                 }
-                else if (parameter.Value is IDictionary<string, string>)
+                else if (parameter.Value.Value is IDictionary<string, string>)
                 {
-                    uriTemplate.SetParameter(parameter.Key, (IDictionary<string, string>)parameter.Value);
+                    uriTemplate.SetParameter(parameter.Key, (IDictionary<string, string>)parameter.Value.Value);
                 }
                 else
                 {
-                    uriTemplate.SetParameter(parameter.Key, parameter.Value.ToString());
+                    uriTemplate.SetParameter(parameter.Key, parameter.Value.Value.ToString());
                 }
             }
         }
 
     }
+
+    public class LinkParameter
+    {
+        public string Name { get; set; }
+        public object Value { get; set; }
+        public Uri Identifier { get; set; }
+    }
+
+   
 }

@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using Tavis.IANA;
 
 namespace Tavis
 {
-    public class LinkRegistry
+    public class LinkFactory
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
         private readonly List<IHttpResponseHandler> _GlobalResponseHandlers = new List<IHttpResponseHandler>();
 
-        public LinkRegistry()
+        public LinkFactory()
         {
             // Register all official IANA link types
             AddLinkType<AboutLink>();
@@ -145,4 +146,6 @@ namespace Tavis
             ResponseHandlers = new List<IHttpResponseHandler>();
         }
     }
+
+   
 }

@@ -10,14 +10,14 @@ namespace Tavis
 {
     public class LinkHeaderParser
     {
-        private readonly LinkRegistry _linkRegistry;
+        private readonly LinkFactory _linkFactory;
 
 
         public Uri BaseUrl { get; protected set; }
 
-        public LinkHeaderParser(LinkRegistry linkRegistry)
+        public LinkHeaderParser(LinkFactory linkFactory)
         {
-            _linkRegistry = linkRegistry;
+            _linkFactory = linkFactory;
         }
 
         public IList<Link> Parse(Uri baseUrl, string linkHeader)
@@ -113,7 +113,7 @@ namespace Tavis
         }
       }
 
-        Link link = _linkRegistry.CreateLink(rel);
+        Link link = _linkFactory.CreateLink(rel);
         link.Target = new Uri(BaseUrl, url);
         link.Relation = rel;
         link.Title=  title_s ?? title;

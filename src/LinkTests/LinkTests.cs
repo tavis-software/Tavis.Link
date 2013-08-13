@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Tavis;
 using Xunit;
 
@@ -219,7 +220,20 @@ namespace LinkTests
             Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
         }
 
+        [Fact]
+        public void CreateJson()
+        {
+            var jtoken = JToken.Parse("\"hello\" ") as JValue;
+            Assert.Equal(jtoken.Value,"hello");
 
+        }
+        [Fact]
+        public void CreateJson2()
+        {
+            var jtoken = JToken.Parse("{\"hello\": 99 } ") as JObject;
+            Assert.Equal(jtoken["hello"], 99);
+
+        }
 
         //[Fact]
         //public void TestTranslateLink()
