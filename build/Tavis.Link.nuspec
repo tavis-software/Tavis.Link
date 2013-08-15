@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>0.4.1-beta</version>
+    <version>0.4.2-beta</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>

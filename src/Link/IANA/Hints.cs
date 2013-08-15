@@ -9,17 +9,19 @@ namespace Tavis.IANA
 {
     public class AllowHint : Hint
     {
-        private readonly JArray _Methods = new JArray();
-
+        private readonly JArray _Content = new JArray();
+        private Dictionary<HttpMethod, object> _Methods = new Dictionary<HttpMethod, object>(); 
         public AllowHint()
         {
             Name = "allow";
-            Content = _Methods;
+            Content = _Content;
 
         }
         public void AddMethod(HttpMethod method)
         {
-            _Methods.Add(new JValue(method.Method));
+            if (_Methods.ContainsKey(method)) return;
+            _Methods.Add(method,null);
+            _Content.Add(new JValue(method.Method));
         }
 
     }
