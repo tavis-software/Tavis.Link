@@ -235,6 +235,22 @@ namespace LinkTests
 
         }
 
+
+        [Fact]
+        public void SOQuestion18302092()
+        {
+            var link = new Link();
+            link.Target = new Uri("http://www.myBase.com/get{?a,b}");
+
+            link.SetParameter("a","1");
+            link.SetParameter("b", "c");
+
+            var request = link.CreateRequest();
+            Assert.Equal("http://www.myBase.com/get?a=1&b=c", request.RequestUri.OriginalString);
+            
+            
+        }
+
         //[Fact]
         //public void TestTranslateLink()
         //{

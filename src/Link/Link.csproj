@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Hint.cs" />
+    <Compile Include="HintFactory.cs" />
     <Compile Include="HttpClientExtensions.cs" />
     <Compile Include="DelegatingResponseHandler.cs" />
     <Compile Include="HttpHeaderExtensions.cs" />

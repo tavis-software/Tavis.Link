@@ -17,6 +17,10 @@ namespace Tavis.IANA
             Content = _Content;
 
         }
+        public IEnumerable<HttpMethod> Methods
+        {
+            get { return _Methods.Keys; }
+        } 
         public void AddMethod(HttpMethod method)
         {
             if (_Methods.ContainsKey(method)) return;
@@ -24,13 +28,14 @@ namespace Tavis.IANA
             _Content.Add(new JValue(method.Method));
         }
 
+
     }
 
     public class FormatsHint : Hint
     {
         public FormatsHint()
         {
-            Name = "format";
+            Name = "formats";
         }
     }
 

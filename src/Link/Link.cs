@@ -92,7 +92,7 @@ namespace Tavis
         public virtual HttpRequestMessage CreateRequest()
         {
             Uri resolvedTarget = Target;
-            if (Target.OriginalString.Contains("{"))
+            if (Target != null && Target.OriginalString.Contains("{"))
             {
                 resolvedTarget = GetResolvedTarget();
             }
@@ -112,6 +112,15 @@ namespace Tavis
             }
             
             requestMessage.Headers.Referrer = Context;
+
+
+            foreach (var hint in _Hints.Values)
+            {
+                if (hint.ConfigureRequest != null)
+                {
+                    requestMessage = hint.ConfigureRequest(hint, requestMessage);
+                }
+            }
             
             return requestMessage;
         }
