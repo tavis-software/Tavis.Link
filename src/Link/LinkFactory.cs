@@ -12,6 +12,9 @@ namespace Tavis
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
         private readonly List<IHttpResponseHandler> _GlobalResponseHandlers = new List<IHttpResponseHandler>();
 
+
+        public HintFactory HintFactory { get; set; }
+
         public LinkFactory()
         {
             // Register all official IANA link types
@@ -81,6 +84,8 @@ namespace Tavis
             AddLinkType<WorkingCopyLink>();
             AddLinkType<WorkingCopyOfLink>();
 
+            HintFactory = new HintFactory();  // Default hintfactory
+
         }
 
         public void AddLinkType<T>() where T : Link, new()
@@ -103,6 +108,13 @@ namespace Tavis
 
         public Link CreateLink(string relation)
         {
+            if (!_LinkRegistry.ContainsKey(relation))
+            {
+                return new Link()
+                    {
+                        Relation = relation
+                    };
+            }
             var reg = _LinkRegistry[relation];
             var t = Activator.CreateInstance(reg.LinkType) as Link;
             SetupHandlers(reg, t);
