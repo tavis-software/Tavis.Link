@@ -89,6 +89,7 @@
     <Compile Include="NotFoundHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResponseHandlerTests.cs" />
+    <Compile Include="SkyDriveApiTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -97,6 +98,10 @@
     <ProjectReference Include="..\Link\Link.csproj">
       <Project>{4D56A07D-3985-4D1C-86E3-094F4961CC25}</Project>
       <Name>Link</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OAuthLinks\OAuthLinks.csproj">
+      <Project>{7b105573-d9ca-4869-bda0-412573e19d86}</Project>
+      <Name>OAuthLinks</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
