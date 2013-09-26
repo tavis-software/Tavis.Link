@@ -33,9 +33,21 @@ namespace Tavis.IANA
 
     public class FormatsHint : Hint
     {
+
         public FormatsHint()
         {
             Name = "formats";
+            Content = new JObject();
+        }
+
+        public void AddMediaType(string mediaType, bool deprecated = false)
+        {
+            var content = new JObject();
+            if (deprecated)
+            {
+                content["deprecated"] = true;
+            }
+            Content[mediaType] = content;
         }
     }
 
@@ -44,6 +56,7 @@ namespace Tavis.IANA
         public LinksHint()
         {
             Name = "links";
+            Content = new JObject();
         }
     }
 
@@ -52,6 +65,17 @@ namespace Tavis.IANA
         public AcceptPostHint()
         {
             Name = "accept-post";
+            Content = new JObject();
+        }
+
+        public void AddMediaType(string mediaType, bool deprecated = false)
+        {
+            var content = new JObject();
+            if (deprecated)
+            {
+                content["deprecated"] = true;
+            }
+            Content[mediaType] = content;
         }
     }
 
@@ -60,6 +84,17 @@ namespace Tavis.IANA
         public AcceptPatchHint()
         {
             Name = "accept-patch";
+            Content = new JObject();
+        }
+        
+        public void AddMediaType(string mediaType, bool deprecated = false)
+        {
+            var content = new JObject();
+            if (deprecated)
+            {
+                content["deprecated"] = true;
+            }
+            Content[mediaType] = content;
         }
     }
 
@@ -76,6 +111,12 @@ namespace Tavis.IANA
         public AcceptPreferHint()
         {
             Name = "accept-prefer";
+            Content = new JArray();
+        }
+
+        public void AddPreference(string value)
+        {
+            ((JArray)Content).Add(value);
         }
     }
 

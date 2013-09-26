@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using Tavis;
 using Tavis.IANA;
 using Xunit;
@@ -88,6 +89,46 @@ namespace LinkTests
 
             Assert.Equal(foo,true);
         }
+
+
+        [Fact]
+        public void CreateFormatHint()
+        {
+            var registry = new HintFactory();
+
+            var hint = registry.CreateHint<FormatsHint>();
+            hint.AddMediaType("application/json");
+
+            var obj = (JObject) hint.Content;
+            Assert.NotNull(obj.Property("application/json"));   
+        }
+
+        [Fact]
+        public void CreateDeprecatedFormatHint()
+        {
+            var registry = new HintFactory();
+
+            var hint = registry.CreateHint<FormatsHint>();
+            hint.AddMediaType("application/json",true);
+
+            var obj = (JObject)hint.Content;
+            Assert.NotNull(obj.Property("application/json"));
+            var thing = obj.Property("application/json").Value as JObject;
+            Assert.Equal(true,(bool)thing.Property("deprecated").Value);
+        }
+
+        [Fact]
+        public void CreatePreferHint()
+        {
+            var registry = new HintFactory();
+
+            var hint = registry.CreateHint<AcceptPreferHint>();
+            hint.AddPreference("handling");
+
+            var arr = (JArray)hint.Content;
+            Assert.Equal("handling", arr[0]);
+        }
+    
     }
 
     
