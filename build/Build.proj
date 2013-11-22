@@ -1,0 +1,34 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="default">
+  <PropertyGroup>
+    <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
+    <Configuration Condition="'$(Configuration)'==''" >Release</Configuration>
+    <BuildDir>$(BaseDir)\build</BuildDir>
+    <PackageDir>$(BuildDir)\Packages</PackageDir>
+    <ProjectFile35>$(BaseDir)\src\UriTemplates\UriTemplates.csproj</ProjectFile35>
+    <ProjectFilePCL>$(BaseDir)\src\Link\Link.csproj</ProjectFilePCL>
+  	<Project>Link</Project>
+	<OutputDir>$(BaseDir)\src\$(Project)\bin\$(Configuration)</OutputDir>
+	<SolutionDir>$(BaseDir)</SolutionDir>  <!-- Needed or import of nuget targets in csproj file fails-->
+  </PropertyGroup>
+ 
+  
+  <Target Name="default" DependsOnTargets="Compile; Package" />
+ 
+  <Target Name="Compile">
+	<MSBuild Projects="$(ProjectFilePCL)" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
+	<MSBuild Projects="$(BaseDir)\src\OAuthLinks\OAuthLinks.csproj" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
+	<MSBuild Projects="$(BaseDir)\src\SearchLink\SearchLink.csproj" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
+  
+  </Target>
+ 
+  <Target Name="Package">
+ 
+    <Exec WorkingDirectory="$(BuildDir)" 
+          Command="$(BaseDir)\.nuget\nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec" />
+    <Exec WorkingDirectory="$(BuildDir)" 
+          Command="$(BaseDir)\.nuget\nuget.exe pack $(BuildDir)\Tavis.Link.OAuth.nuspec" />
+    <Exec WorkingDirectory="$(BuildDir)" 
+          Command="$(BaseDir)\.nuget\nuget.exe pack $(BuildDir)\Tavis.Link.Search.nuspec" />
+ 
+  </Target>
+</Project>

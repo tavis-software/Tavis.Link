@@ -6,14 +6,15 @@ namespace Tavis.OAuth
     public class OAuth2AuthorizeLink : Link
     {
         public string ClientId { get; set; }
-
         public string ResponseType { get; set; }
-
         public Uri RedirectUri { get; set; }
-
         public string[] Scope { get; set; }
-
         public Uri AuthorizationServer { get; set; }
+
+        public OAuth2AuthorizeLink()
+        {
+            Relation = "oauth2-authorize";
+        }
 
         public override HttpRequestMessage CreateRequest()
         {

@@ -7,9 +7,14 @@ namespace Tavis.OAuth
 {
     public class OAuth2TokenLink : Link
     {
-        private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>(); 
+        private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>();
 
-       
+
+        public OAuth2TokenLink()
+        {
+            Relation = "oauth2-token";
+        }
+
         public Uri RedirectUri
         {
             get { return new Uri(_BodyParameters["redirect_uri"]);  }

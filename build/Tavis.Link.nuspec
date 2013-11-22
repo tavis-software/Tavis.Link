@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>0.4.5-beta</version>
+    <version>0.4.6</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Added support for several other hints</releaseNotes>
+    <releaseNotes>Changed to a PCL library</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-      <dependency id="Tavis.UriTemplates" version="0.1.2-beta" />
+      <dependency id="Tavis.UriTemplates" version="0.4.0" />
 	  <dependency id="Microsoft.Net.Http" version="2.2.13" />
 	</dependencies>
   </metadata>

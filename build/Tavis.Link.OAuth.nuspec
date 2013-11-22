@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Tavis.Link.OAuth</id>
+    <version>0.4.6</version>
+    <authors>Darrel Miller</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Links for for the link relations oauth-token and oauth-authorize</description>
+    <releaseNotes>Changed to a PCL library</releaseNotes>
+    <projectUrl>https://github.com/tavis-software/Link</projectUrl>
+ 	<dependencies>
+      <dependency id="Tavis.Link" version="0.4.6" />
+	</dependencies>
+  </metadata>
+  <files>
+    <file src="..\src\OAuthLinks\bin\Release\OAuthLinks.dll" target="lib\portable-win+net40+sl40+wp71" />
+  </files>
+</package>
