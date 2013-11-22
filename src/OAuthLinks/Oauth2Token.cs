@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LinkTests
+namespace Tavis.OAuth
 {
     public class Oauth2Token
     {

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using OAuthLinks;
 using Tavis;
+using Tavis.OAuth;
 using Xunit;
 
-namespace LinkTests
+namespace Samples
 {
     public class SkyDriveApiTests
     {

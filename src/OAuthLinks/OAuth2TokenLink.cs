@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using LinkTests;
 using Newtonsoft.Json.Linq;
-using Tavis;
 
-namespace OAuthLinks
+namespace Tavis.OAuth
 {
     public class OAuth2TokenLink : Link
     {
@@ -93,9 +91,28 @@ namespace OAuthLinks
 
         }
 
-        public static object ParseErrorBody(string body)
+        public static object ParseErrorBody(string tokenBody)
         {
-            throw new NotImplementedException();
+            var jobject = JToken.Parse(tokenBody) as JObject;
+            var token = new OAuth2Error();
+            foreach (var jprop in jobject.Properties())
+            {
+                switch (jprop.Name)
+                {
+                    case "error":
+                        token.Error = (string)jprop.Value;
+                        break;
+                    case "error_description":
+                        token.ErrorDescription = (string)jprop.Value;
+                        break;
+                    case "error_uri":
+                        token.ErrorUri = (string)jprop.Value;
+                        break;
+                    
+                }
+            }
+
+            return token;
         }
     }
 }
