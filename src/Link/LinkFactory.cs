@@ -10,7 +10,7 @@ namespace Tavis
     public class LinkFactory
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
-        private readonly List<IHttpResponseHandler> _GlobalResponseHandlers = new List<IHttpResponseHandler>();
+        private readonly List<DelegatingResponseHandler> _GlobalResponseHandlers = new List<DelegatingResponseHandler>();
 
 
         public HintFactory HintFactory { get; set; }
@@ -101,7 +101,7 @@ namespace Tavis
             reg.ResponseHandlers.Add(handler);
         }
 
-        public void AddGlobalHandler(IHttpResponseHandler handler) 
+        public void AddGlobalHandler(DelegatingResponseHandler handler) 
         {
             _GlobalResponseHandlers.Add(handler);
         }
@@ -131,17 +131,17 @@ namespace Tavis
 
         }
 
-        private static void SetupHandlers(LinkRegistration reg, Link t)
+        private void SetupHandlers(LinkRegistration reg, Link t)
         {
-            if (reg.ResponseHandlers.Count == 1)
+            if (reg.ResponseHandlers.Count == 1 && _GlobalResponseHandlers.Count == 0 )
             {
                 t.HttpResponseHandler = reg.ResponseHandlers.First(); // Must be just a IHttpResponseHandler
             }
             else
             {
-                foreach (var handler in reg.ResponseHandlers)
+                foreach (var handler in reg.ResponseHandlers.Cast<DelegatingResponseHandler>().Union(_GlobalResponseHandlers))
                 {
-                    t.AddHandler((DelegatingResponseHandler) handler);
+                    t.AddHandler(handler);
                 }
             }
         }

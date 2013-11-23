@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Tavis;
 using Tavis.OAuth;
 using Xunit;
@@ -83,5 +84,17 @@ namespace Samples
 
         }
 
+        [Fact]
+        public void DownloadFolderContentsFromSkyDrive()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", "EwA4Aq1DBAAUGCCXc8wU/zFu9QnLdZXy+YnElFkAAYhf1bgSt9B/dWMmZfEF2rBqHwg9q3CclBY0t6eEbXR0CoQG/JmhGOHkwkz2FXYGPF2gQYBkSjBrZpiMzVZV3xcW3HAjLOJ0psokGXmZO7Bf+PizaolmtfJtu/ZuomcLCkGE/6W/r3CqKpn5NBvX1T96/Ri3M/dV6OTUgcSQ/lRGxxCrLFcTO78tQTFG2x2hldoeJErDhndbpUmleo+7pGMN7eZfHS5ht1Y5Mn6Z8W+r950UsIpjgiqW8UITDNB6XCUZJFCZQT++/wN+Q0Tso4HbdsgSMTfcVc0tZsjr4dmSLLiMykh+nzECQKRoZqqu7oRStTJEXMTAE9RQpgSD6xUDZgAACFOVfhYLm9uHCAFSZLM344beauG+0sCtOQSkIX7qSUaB6y3v+PJPNARXzBTCwqdwKD9faRnHEOmZ5YCvn0Rg9+ex2fd/PGfQbm7I+K/INqTS8Tu8BA+UDwWymjnIvZB3tkbEX4yBEYPQXkNCpae9j3uZtRm2NfLWacq4x4/wxGqVVy+rCxNwo7rkWwVGyPTSTu41mqa9O2MqB33SEMtoDb2LE+GV3hGVbqr0pKGtVeJJ+bzqtW5i8e2pFiKN6RXj4wTaijjz8N6wwiB913WzTbwNNOvP2XcnY1TC6Cz3p9Fh7+AHOGR9R50A5FjjWcROa/wmXjzZrMVMxbw5db0X0KutgPOdj9QNBoMerjHEfYV3i+EAAA==");
+            // var response = client.GetAsync(new Uri("https://apis.live.net/v5.0/me/skydrive")).Result;
+            // var response = client.GetAsync(new Uri("https://apis.live.net/v5.0/folder.e73792dc59d3ef31/files")).Result;
+            var response = client.GetAsync(new Uri("https://ctzxcq.dm2301.livefilestore.com/y2mgKMJ0KyFGfBIno866zDLpVJZxEJrzDS0kpcgpCeUkr0ygRZuHqGwUdemJbkhCp1efMGY5303eAYFhJZtRZeDzuBmMrUZWAJF25GmfbyN5us/test.txt?psid=1")).Result;
+
+            var body = response.Content.ReadAsStringAsync().Result;
+
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Tavis;
 using Tavis.IANA;
@@ -44,14 +45,36 @@ namespace LinkTests
 
 
             Assert.IsType<ActionResponseHandler>(link.HttpResponseHandler);
+            
         }
+
+        [Fact]
+        public void SpecifyGlobalHandler()
+        {
+            var foo = false;
+
+            var registry = new LinkFactory();
+            registry.AddGlobalHandler(new ActionResponseHandler((hrm) => foo = true));
+
+            var link = registry.CreateLink<AboutLink>();
+
+
+            Assert.IsType<ActionResponseHandler>(link.HttpResponseHandler);
+            
+            
+        }
+
+  
 
         [Fact]
         public Task SpecifyHandlerChainForAboutLink()
         {
             var foo = false;
             var bar = false;
+            var baz = false;
+  
             var registry = new LinkFactory();
+            registry.AddGlobalHandler(new ActionResponseHandler((hrm) => baz = true));
             registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
             registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => bar = true));
 
@@ -63,7 +86,7 @@ namespace LinkTests
                 {
                     Assert.True(foo);
                     Assert.True(bar);
-                   
+                    Assert.True(baz);
                 });
 
         }
