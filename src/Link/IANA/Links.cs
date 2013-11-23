@@ -1,577 +1,435 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 
 namespace Tavis.IANA
 {
+    [LinkRelationType("about")]
     public class AboutLink : Link
     {
-        public AboutLink()
-        {
-            Relation = "about";
-        }
     }
+
+    [LinkRelationType("alternate")]
     public class AlternateLink : Link
     {
-        public AlternateLink()
-        {
-            Relation = "alternate";
-        }
     }
+
+    [LinkRelationType("appendix")]
     public class AppendixLink : Link
     {
-        public AppendixLink()
-        {
-            Relation = "appendix";
-        }
     }
+
+    [LinkRelationType("archives")]
     public class ArchivesLink : Link
     {
-        public ArchivesLink()
-        {
-            Relation = "archives";
-        }
     }
+
+    [LinkRelationType("author")]
     public class AuthorLink : Link
     {
-        public AuthorLink()
-        {
-            Relation = "author";
-        }
     }
+
+    [LinkRelationType("bookmark")]
     public class BookmarkLink : Link
     {
-        public BookmarkLink()
-        {
-            Relation = "Bookmark";
-        }
     }
+
+    [LinkRelationType("canonical")]
     public class CanonicalLink : Link
     {
-        public CanonicalLink()
-        {
-            Relation = "Canonical";
-        }
     }
+
+    [LinkRelationType("chapter")]
     public class ChapterLink : Link
     {
-        public ChapterLink()
-        {
-            Relation = "Chapter";
-        }
     }
+
+    [LinkRelationType("collection")]
     public class CollectionLink : Link
     {
-        public CollectionLink()
-        {
-            Relation = "collection";
-        }
     }
+
+    [LinkRelationType("contents")]
     public class ContentsLink : Link
     {
-        public ContentsLink()
-        {
-            Relation = "contents";
-        }
     }
+
+    [LinkRelationType("copyright")]
     public class CopyrightLink : Link
     {
-        public CopyrightLink()
-        {
-            Relation = "copyright";
-        }
     }
+
+    [LinkRelationType("create-form")]
     public class CreateFormLink : Link
     {
-        public CreateFormLink()
-        {
-            Relation = "create-form";
-        }
     }
+
+    [LinkRelationType("current")]
     public class CurrentLink : Link
     {
-        public CurrentLink()
-        {
-            Relation = "current";
-        }
     }
 
+    [LinkRelationType("describedby")]
     public class DescribedByLink : Link
     {
-        public DescribedByLink()
-        {
-            Relation = "describedby";
-        }
     }
 
+    [LinkRelationType("describes")]
     public class DescribesLink : Link
     {
-        public DescribesLink()
-        {
-            Relation = "describes";
-        }
     }
 
+    [LinkRelationType("disclosure")]
     public class DisclosureLink : Link
     {
-        public DisclosureLink()
-        {
-            Relation = "disclosure";
-        }
     }
 
+    [LinkRelationType("duplicate")]
     public class DuplicateLink : Link
     {
-        public DuplicateLink()
-        {
-            Relation = "duplicate";
-        }
     }
 
+    [LinkRelationType("edit")]
     public class EditLink : Link
     {
-        public EditLink()
-        {
-            Relation = "edit";
-        }
     }
 
+    [LinkRelationType("edit-form")]
     public class EditFormLink : Link
     {
-        public EditFormLink()
-        {
-            Relation = "edit-form";
-        }
     }
 
+    [LinkRelationType("edit-media")]
     public class EditMediaLink : Link
     {
-        public EditMediaLink()
-        {
-            Relation = "edit-media";
-        }
     }
 
+    [LinkRelationType("enclosure")]
     public class EnclosureLink : Link
     {
-        public EnclosureLink()
-        {
-            Relation = "enclosure";
-        }
     }
 
+    [LinkRelationType("first")]
     public class FirstLink : Link
     {
-        public FirstLink()
-        {
-            Relation = "first";
-        }
     }
 
+    [LinkRelationType("glossary")]
     public class GlossaryLink : Link
     {
-        public GlossaryLink()
-        {
-            Relation = "glossary";
-        }
     }
 
+    [LinkRelationType("help")]
     public class HelpLink : Link
     {
-        public HelpLink()
-        {
-            Relation = "help";
-        }
     }
 
+    [LinkRelationType("hosts")]
     public class HostsLink : Link
     {
-        public HostsLink()
-        {
-            Relation = "hosts";
-        }
     }
 
+    [LinkRelationType("hub")]
     public class HubLink : Link
     {
+        public enum SubscribeMode
+        {
+            subscribe,
+            unsubscribe
+        };
+
+        public Uri Callback { get; set; }
+        public SubscribeMode Mode  { get; set; }
+        public Uri Topic { get; set; } 
+        public TimeSpan Lease { get; set; }
+        public string Secret { get; set; }
+
         public HubLink()
         {
-            Relation = "hub";
+            Method = HttpMethod.Post;
+            Mode = SubscribeMode.subscribe;
+        }
+
+        public override HttpRequestMessage CreateRequest()
+        {
+            var bodyParameters = new Dictionary<string, string>()
+            {
+                {"hub.callback",Callback.OriginalString},
+                {"hub.mode", Mode.ToString()},
+                {"hub.topic", Topic.OriginalString},
+            };
+            
+            if (Lease.TotalSeconds > 0) bodyParameters.Add("hub.lease_seconds",Lease.TotalSeconds.ToString());
+            if (!String.IsNullOrEmpty(Secret)) bodyParameters.Add("hub.secret", Secret);
+
+            var request = base.CreateRequest();
+
+            request.Content = new FormUrlEncodedContent(bodyParameters);
+            return request;
+        }
+
+        public static bool IsSubscribed(HttpResponseMessage response)
+        {
+            return response.StatusCode == HttpStatusCode.Accepted;
         }
     }
 
+    [LinkRelationType("icon")]
     public class IconLink : Link
     {
-        public IconLink()
-        {
-            Relation = "icon";
-        }
+
     }
 
+    [LinkRelationType("index")]
     public class IndexLink : Link
     {
-        public IndexLink()
-        {
-            Relation = "index";
-        }
     }
 
+    [LinkRelationType("item")]
     public class ItemLink : Link
     {
-        public ItemLink()
-        {
-            Relation = "item";
-        }
     }
 
+    [LinkRelationType("last")]
     public class LastLink : Link
     {
-        public LastLink()
-        {
-            Relation = "last";
-        }
     }
 
+    [LinkRelationType("latest-version")]
     public class LatestVersionLink : Link
     {
-        public LatestVersionLink()
-        {
-            Relation = "latest-version";
-        }
     }
 
+    [LinkRelationType("license")]
     public class LicenseLink : Link
     {
-        public LicenseLink()
-        {
-            Relation = "license";
-        }
     }
 
+    [LinkRelationType("lrdd")]
     public class LrddLink : Link
     {
-        public LrddLink()
-        {
-            Relation = "lrdd";
-        }
     }
 
+    [LinkRelationType("monitor")]
     public class MonitorLink : Link
     {
-        public MonitorLink()
-        {
-            Relation = "monitor";
-        }
     }
 
+    [LinkRelationType("monitor-group")]
     public class MonitorGroupLink : Link
     {
-        public MonitorGroupLink()
-        {
-            Relation = "monitor-group";
-        }
     }
 
+    [LinkRelationType("next")]
     public class NextLink : Link
     {
-        public NextLink()
-        {
-            Relation = "next";
-        }
     }
 
+    [LinkRelationType("next-archive")]
     public class NextArchiveLink : Link
     {
-        public NextArchiveLink()
-        {
-            Relation = "next-archive";
-        }
     }
 
+    [LinkRelationType("nofollow")]
     public class NoFollowLink : Link
     {
-        public NoFollowLink()
-        {
-            Relation = "nofollow";
-        }
     }
 
+    [LinkRelationType("noreferrer")]
     public class NoReferrerLink : Link
     {
-        public NoReferrerLink()
-        {
-            Relation = "noreferrer";
-        }
     }
 
+    [LinkRelationType("payment")]
     public class PaymentLink : Link
     {
-        public PaymentLink()
-        {
-            Relation = "payment";
-        }
     }
 
+    [LinkRelationType("predecessor-version")]
     public class PredecessorVersionLink : Link
     {
-        public PredecessorVersionLink()
-        {
-            Relation = "predecessor-version";
-        }
     }
 
+    [LinkRelationType("prefetch")]
     public class PrefetchLink : Link
     {
-        public PrefetchLink()
-        {
-            Relation = "prefetch";
-        }
     }
 
+    [LinkRelationType("prev")]
     public class PrevLink : Link
     {
-        public PrevLink()
-        {
-            Relation = "prev";
-        }
     }
 
+    [LinkRelationType("preview")]
     public class PreviewLink : Link
     {
-        public PreviewLink()
-        {
-            Relation = "preview";
-        }
     }
 
+    [LinkRelationType("previous")]
     public class PreviousLink : Link
     {
-        public PreviousLink()
-        {
-            Relation = "Previous";
-        }
     }
 
+    [LinkRelationType("prev-archive")]
     public class PrevArchiveLink : Link
     {
-        public PrevArchiveLink()
-        {
-            Relation = "prev-archive";
-        }
     }
 
+    [LinkRelationType("privacy-policy")]
     public class PrivacyPolicyLink : Link
     {
-        public PrivacyPolicyLink()
-        {
-            Relation = "privacy-policy";
-        }
     }
 
+    [LinkRelationType("profile")]
     public class ProfileLink : Link
     {
-        public ProfileLink()
-        {
-            Relation = "profile";
-        }
     }
 
+    [LinkRelationType("related")]
     public class RelatedLink : Link
     {
-        public RelatedLink()
-        {
-            Relation = "related";
-        }
     }
 
     /// <summary>
     /// Identifies a resource that is a reply to the context of the link. 
     /// </summary>
+    [LinkRelationType("replies")]
     public class RepliesLink : Link
     {
-        public RepliesLink()
-        {
-            Relation = "replies";
-        }
     }
 
     /// <summary>
     /// Refers to a resource that can be used to search through the link's context and related resources.
     /// </summary>
+
+    [LinkRelationType("search")]
     public class SearchLink : Link
     {
-        public SearchLink()
-        {
-            Relation = "search";
-        }
     }
 
     /// <summary>
     /// Refers to a section in a collection of resources.
     /// </summary>
+    [LinkRelationType("section")]
     public class SectionLink : Link
     {
-        public SectionLink()
-        {
-            Relation = "section";
-        }
     }
 
     /// <summary>
     /// Conveys an identifier for the link's context. 
     /// </summary>
+    [LinkRelationType("self")]
     public class SelfLink : Link
     {
-        public SelfLink()
-        {
-            Relation = "self";
-        }
     }
 
     /// <summary>
     /// Indicates a URI that can be used to retrieve a service document.
     /// </summary>
+    [LinkRelationType("service")]
     public class ServiceLink : Link
     {
-        public ServiceLink()
-        {
-            Relation = "service";
-        }
     }
 
     /// <summary>
     /// Refers to the first resource in a collection of resources.
     /// </summary>
+    [LinkRelationType("start")]
     public class StartLink : Link
     {
-        public StartLink()
-        {
-            Relation = "start";
-        }
     }
 
     /// <summary>
     /// Refers to a stylesheet.
     /// </summary>
+    [LinkRelationType("stylesheet")]
     public class StylesheetLink : Link
     {
-        public StylesheetLink()
-        {
-            Relation = "stylesheet";
-        }
     }
 
     /// <summary>
     /// Refers to a resource serving as a subsection in a collection of resources.
     /// </summary>
+    [LinkRelationType("subsection")]
     public class SubSectionLink : Link
     {
-        public SubSectionLink()
-        {
-            Relation = "subsection";
-        }
     }
 
 
     /// <summary>
     /// Points to a resource containing the successor version in the version history. 
     /// </summary>
+    [LinkRelationType("successor-version")]
     public class SuccessorVersionLink : Link
     {
-        public SuccessorVersionLink()
-        {
-            Relation = "successor-version";
-        }
     }
 
 
     /// <summary>
     /// Gives a tag (identified by the given address) that applies to the current document. 
     /// </summary>
+    [LinkRelationType("tag")]
     public class TagLink : Link
     {
-        public TagLink()
-        {
-            Relation = "tag";
-        }
     }
 
     /// <summary>
     /// Refers to the terms of service associated with the link's context.
     /// </summary>
+    [LinkRelationType("terms-of-service")]
     public class TermsOfServiceLink : Link
     {
-        public TermsOfServiceLink()
-        {
-            Relation = "terms-of-service";
-        }
     }
 
     /// <summary>
     /// Refers to a resource identifying the abstract semantic type of which the link's context is considered to be an instance.
     /// </summary>
+    [LinkRelationType("type")]
     public class TypeLink : Link
     {
-        public TypeLink()
-        {
-            Relation = "type";
-        }
     }
 
     /// <summary>
     /// Refers to a parent document in a hierarchy of documents. 
     /// </summary>
+    [LinkRelationType("up")]
     public class UpLink : Link
     {
-        public UpLink()
-        {
-            Relation = "up";
-        }
     }
 
     /// <summary>
     /// Points to a resource containing the version history for the context. 
     /// </summary>
+    [LinkRelationType("version-history")]
     public class VersionHistoryLink : Link
     {
-        public VersionHistoryLink()
-        {
-            Relation = "version-history";
-        }
     }
 
     /// <summary>
     /// Identifies a resource that is the source of the information in the link's context. 
     /// </summary>
+    [LinkRelationType("via")]
     public class ViaLink : Link
     {
-        public ViaLink()
-        {
-            Relation = "via";
-        }
     }
 
     /// <summary>
     /// Points to a working copy for this resource.
     /// </summary>
+    [LinkRelationType("working-copy")]
     public class WorkingCopyLink : Link
     {
-        public WorkingCopyLink()
-        {
-            Relation = "working-copy";
-        }
     }
 
     /// <summary>
     /// Points to the versioned resource from which this working copy was obtained. 
     /// </summary>
+    [LinkRelationType("working-copy-of")]
     public class WorkingCopyOfLink : Link
     {
-        public WorkingCopyOfLink()
-        {
-            Relation = "working-copy-of";
-        }
     }
 }
 

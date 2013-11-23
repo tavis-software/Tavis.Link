@@ -5,15 +5,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Tavis.OAuth
 {
+    [LinkRelationType("oauth2-token")]
     public class OAuth2TokenLink : Link
     {
         private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>();
 
-
-        public OAuth2TokenLink()
-        {
-            Relation = "oauth2-token";
-        }
 
         public Uri RedirectUri
         {

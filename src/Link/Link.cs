@@ -67,7 +67,8 @@ namespace Tavis
         public IHttpResponseHandler HttpResponseHandler { get; set; }
 
         public readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
- 
+
+       
 
         // This allows Request headers to be set and re-used for multiple requests.  Current a HttpRequestMessage can only be used once. 
         public HttpRequestHeaders RequestHeaders
@@ -87,6 +88,8 @@ namespace Tavis
         public Link() : base()
         {
             Method = HttpMethod.Get;
+            Relation = LinkHelper.GetLinkRelationTypeName(GetType());
+
         }
 
         public virtual HttpRequestMessage CreateRequest()

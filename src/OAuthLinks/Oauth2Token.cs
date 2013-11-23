@@ -2,6 +2,7 @@
 
 namespace Tavis.OAuth
 {
+    
     public class Oauth2Token
     {
         public string TokenType { get; set; }
