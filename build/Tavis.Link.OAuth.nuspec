@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link.OAuth</id>
-    <version>0.4.8</version>
+    <version>0.5.0</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Links for for the link relations oauth-token and oauth-authorize</description>
     <releaseNotes>Changed to a PCL library</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-      <dependency id="Tavis.Link" version="0.4.8" />
+      <dependency id="Tavis.Link" version="0.5.0" />
 	</dependencies>
   </metadata>
   <files>
