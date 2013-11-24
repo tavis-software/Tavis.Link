@@ -182,7 +182,7 @@ namespace LinkTests
         public void CreateLinkHeader()
         {
             var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
-            Assert.Equal("<http://localhost/{?foo}>", link.AsLinkHeader());
+            Assert.Equal("<http://localhost/{?foo}>;rel=\"related\"", link.AsLinkHeader());
         }
 
         [Fact]
@@ -205,7 +205,7 @@ namespace LinkTests
             };
             link.HrefLang.Add(new CultureInfo("en-GB"));
             link.HrefLang.Add(new CultureInfo("en-CA"));
-            Assert.Equal("<http://localhost/{?foo}>;hreflang=en-GB;hreflang=en-CA;type=\"application/foo\"", link.AsLinkHeader());
+            Assert.Equal("<http://localhost/{?foo}>;rel=\"related\";hreflang=en-GB;hreflang=en-CA;type=\"application/foo\"", link.AsLinkHeader());
         }
 
 

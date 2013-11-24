@@ -10,8 +10,9 @@ namespace LinkTests
     {
         private readonly Action<HttpResponseMessage> _action;
 
-        public ActionResponseHandler(Action<HttpResponseMessage> action)
+        public ActionResponseHandler(Action<HttpResponseMessage> action, DelegatingResponseHandler innerHandler = null)
         {
+            InnerResponseHandler = innerHandler;
             _action = action;
         }
 

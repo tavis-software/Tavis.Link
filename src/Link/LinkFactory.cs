@@ -10,7 +10,6 @@ namespace Tavis
     public class LinkFactory
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
-        private readonly List<DelegatingResponseHandler> _GlobalResponseHandlers = new List<DelegatingResponseHandler>();
 
 
         public HintFactory HintFactory { get; set; }
@@ -94,17 +93,14 @@ namespace Tavis
             _LinkRegistry.Add(t.Relation, new LinkRegistration() {LinkType =typeof(T) } ); 
         }
 
-        public void AddHandler<T>(IHttpResponseHandler handler) where T : Link, new()
+        public void SetHandler<T>(IHttpResponseHandler handler) where T : Link, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
-            reg.ResponseHandlers.Add(handler);
+            reg.ResponseHandler = handler;
         }
 
-        public void AddGlobalHandler(DelegatingResponseHandler handler) 
-        {
-            _GlobalResponseHandlers.Add(handler);
-        }
+
 
         public Link CreateLink(string relation)
         {
@@ -117,7 +113,7 @@ namespace Tavis
             }
             var reg = _LinkRegistry[relation];
             var t = Activator.CreateInstance(reg.LinkType) as Link;
-            SetupHandlers(reg, t);
+            t.HttpResponseHandler = reg.ResponseHandler;
             return t;
 
         }
@@ -126,37 +122,17 @@ namespace Tavis
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
-            SetupHandlers(reg, t);
+            t.HttpResponseHandler = reg.ResponseHandler;
             return t;
 
         }
-
-        private void SetupHandlers(LinkRegistration reg, Link t)
-        {
-            if (reg.ResponseHandlers.Count == 1 && _GlobalResponseHandlers.Count == 0 )
-            {
-                t.HttpResponseHandler = reg.ResponseHandlers.First(); // Must be just a IHttpResponseHandler
-            }
-            else
-            {
-                foreach (var handler in reg.ResponseHandlers.Cast<DelegatingResponseHandler>().Union(_GlobalResponseHandlers))
-                {
-                    t.AddHandler(handler);
-                }
-            }
-        }
-
     }
 
     internal class LinkRegistration
     {
         public Type LinkType { get; set; }
-        public List<IHttpResponseHandler> ResponseHandlers { get; set; }
+        public IHttpResponseHandler ResponseHandler { get; set; }
 
-        public LinkRegistration()
-        {
-            ResponseHandlers = new List<IHttpResponseHandler>();
-        }
     }
 
    

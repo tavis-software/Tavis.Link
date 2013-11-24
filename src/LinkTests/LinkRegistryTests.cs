@@ -43,7 +43,7 @@ namespace LinkTests
             var foo = false;
 
             var registry = new LinkFactory();
-            registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
+            registry.SetHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
 
             var link = registry.CreateLink<AboutLink>();
 
@@ -52,21 +52,7 @@ namespace LinkTests
             
         }
 
-        [Fact]
-        public void SpecifyGlobalHandler()
-        {
-            var foo = false;
-
-            var registry = new LinkFactory();
-            registry.AddGlobalHandler(new ActionResponseHandler((hrm) => foo = true));
-
-            var link = registry.CreateLink<AboutLink>();
-
-
-            Assert.IsType<ActionResponseHandler>(link.HttpResponseHandler);
-            
-            
-        }
+       
 
   
 
@@ -78,9 +64,12 @@ namespace LinkTests
             var baz = false;
   
             var registry = new LinkFactory();
-            registry.AddGlobalHandler(new ActionResponseHandler((hrm) => baz = true));
-            registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
-            registry.AddHandler<AboutLink>(new ActionResponseHandler((hrm) => bar = true));
+            var grh = new ActionResponseHandler((hrm) => baz = true,
+                new ActionResponseHandler((hrm) => foo = true, 
+                    new ActionResponseHandler((hrm) => bar = true)));
+            
+            registry.SetHandler<AboutLink>(grh);
+            
 
             var link = registry.CreateLink<AboutLink>();
             link.Target = new Uri("http://example.org");

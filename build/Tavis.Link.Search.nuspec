@@ -2,14 +2,14 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link.Search</id>
-    <version>0.4.6</version>
+    <version>0.4.8</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Partial implementation of the search link relation</description>
     <releaseNotes>First release</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-    <dependency id="Tavis.Link" version="0.4.6" />
+    <dependency id="Tavis.Link" version="0.4.8" />
 	</dependencies>
   </metadata>
   <files>
