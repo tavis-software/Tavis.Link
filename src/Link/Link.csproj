@@ -26,6 +26,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,6 +37,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Tavis.Link.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -84,7 +87,9 @@
     <Compile Include="LinkHeaderParser.cs" />
     <Compile Include="LinkFactory.cs" />
     <Compile Include="LinkHelper.cs" />
+    <Compile Include="LinkParameter.cs" />
     <Compile Include="LinkRelationTypeAttribute.cs" />
+    <Compile Include="LinkRfc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringBuilderExtensions.cs" />
   </ItemGroup>

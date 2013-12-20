@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace Tavis
 {
+    /// <summary>
+    /// HttpResponseHandler that can be chained into a response pipeline
+    /// </summary>
     public abstract class DelegatingResponseHandler : IHttpResponseHandler
     {
         public DelegatingResponseHandler InnerResponseHandler { get; set; }

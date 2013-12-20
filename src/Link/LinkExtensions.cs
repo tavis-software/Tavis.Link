@@ -9,13 +9,12 @@ namespace Tavis
     public static class LinkExtensions
     {
         /// <summary>
-        /// Add handler to end of chain of handlers
+        /// Add response handler to end of chain of handlers
         /// </summary>
         /// <param name="link"></param>
         /// <param name="responseHandler"></param>
         public static void AddHandler(this Link link, DelegatingResponseHandler responseHandler)
         {
-            
            
             if (link.HttpResponseHandler == null)
             {
@@ -38,11 +37,14 @@ namespace Tavis
                         currentHandler = currentHandler.InnerResponseHandler;
                     } 
                 }
-
             }
         }
 
-
+        /// <summary>
+        /// Serialize link in format that can be returned as a HttpHeader
+        /// </summary>
+        /// <param name="link"></param>
+        /// <returns></returns>
         public static string AsLinkHeader(this Link link)
         {
             var headerValue = new StringBuilder();

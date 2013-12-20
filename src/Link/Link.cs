@@ -1,76 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using Tavis.UriTemplates;
 
 namespace Tavis
 {
-
     /// <summary>
-    /// Link class with all properties as defined by RFC 5788
-    /// http://tools.ietf.org/html/rfc5988
-    /// </summary>
-    public class LinkRfc
-    {
-
-        public Uri Context { get; set; }
-        public Uri Target { get;  set; }
-        public string Relation { get; set; }
-      
-        // TargetAttributes
-        public string Anchor { get;  set; }
-        public string Rev { get;  set; }  //Deprecated byRFC5988
-        public string Title { get;  set; }
-        public Encoding TitleEncoding { get; set; }  // Title in alternate character set - See RFC 5987
-        public List<CultureInfo> HrefLang { get;  private set; }  // More than one of these should be supported
-        public string Media { get;  set; }
-        public MediaTypeHeaderValue Type { get;  set; }
-
-        public string GetLinkExtension(string name)
-        {
-            return _LinkExtensions[name];
-        }
-        public void SetLinkExtension(string name, string value)
-        {
-            _LinkExtensions[name] = value;
-        }
-
-        protected readonly Dictionary<string, string> _LinkExtensions = new Dictionary<string, string>();
-
-        public IEnumerable<KeyValuePair<string, string>> LinkExtensions { get { return _LinkExtensions; } } 
-
-        public LinkRfc() {
-            TitleEncoding = Encoding.UTF8;  // Should be ASCII but PCL does not support ascii and UTF8 does not change ASCII values 
-            HrefLang = new List<CultureInfo>();
-        }
-    }
-
-
-    /// <summary>
-    /// Provides behaviour to allow you to generate HTTP Requests based on Link information and also integrates URITemplating capability
+    /// Link class augments the base LinkRfc class with abilities to:
+    ///     - create HttpRequestMessage
+    ///     - attach link hints
+    ///     - attach response handling behaviour
+    ///     - support for URI templates
     /// 
     /// This class can be subclassed with attributes and behaviour that is specific to a particular link relation
     /// </summary>
     public class Link : LinkRfc
     {
-        private HttpRequestHeaders _requestHeaders;
-        private readonly Dictionary<string, LinkParameter> _Parameters = new Dictionary<string, LinkParameter>();
         
+        /// <summary>
+        /// The HTTP method to be used when following this link, or creating a HTTPRequestMessage
+        /// </summary>
         public HttpMethod Method { get; set; }
+        
+        /// <summary>
+        /// The HTTPContent to be sent with the HTTP request when following this link or creating a HTTPRequestMessage
+        /// </summary>
         public HttpContent Content { get; set; }
-
-        public IHttpResponseHandler HttpResponseHandler { get; set; }
-
-        public readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
-
-       
-
-        // This allows Request headers to be set and re-used for multiple requests.  Current a HttpRequestMessage can only be used once. 
+        
+      
+        /// <summary>
+        /// The Request headers to be used when following this link or creating a HttpRequestMessage.
+        /// </summary>
+        /// <remarks>
+        /// HttpRequestMessage instances can only be used once.  Using a link class as a factory for HttpRequestMessages makes it easier to make multiple similar requests.  
+        /// </remarks>
         public HttpRequestHeaders RequestHeaders
         {
             get
@@ -85,6 +50,20 @@ namespace Tavis
             
         }
 
+        /// <summary>
+        /// A handler with knowledge of how to process the response to following a link.  
+        /// </summary>
+        /// <remarks>
+        /// The use of reponse handlers is completely optional.  They become valuable when media type deserializers use the LinkFactory which is has behaviours pre-registered
+        /// </remarks>
+        public IHttpResponseHandler HttpResponseHandler { get; set; }
+
+        /// <summary>
+        /// Create an instance of a link.  
+        /// </summary>
+        /// <remarks>
+        /// The empty constructor makes it easier for deserializers to create links.
+        /// </remarks>
         public Link() : base()
         {
             Method = HttpMethod.Get;
@@ -92,6 +71,11 @@ namespace Tavis
 
         }
 
+        /// <summary>
+        /// Create an HTTPRequestMessage based on the information stored in the link.
+        /// </summary>
+        /// <remarks>This method can be overloaded to provide custom behaviour when creating the link.  </remarks>
+        /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest()
         {
             Uri resolvedTarget = Target;
@@ -128,6 +112,11 @@ namespace Tavis
             return requestMessage;
         }
 
+        /// <summary>
+        /// Entry point for triggering the execution of the assigned HttpResponseHandler if one exists
+        /// </summary>
+        /// <param name="responseMessage"></param>
+        /// <returns></returns>
         public Task<HttpResponseMessage> HandleResponseAsync(HttpResponseMessage responseMessage)
         {
             if (HttpResponseHandler != null)
@@ -140,49 +129,86 @@ namespace Tavis
         }
 
     
+        /// <summary>
+        /// Returns list of URI Template parameters specified in the Target URI
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<string> GetParameterNames()
         {
             var uriTemplate = new UriTemplate(Target.OriginalString);
             return uriTemplate.GetParameterNames();
         }
 
+
+        /// <summary>
+        /// Resolves the URI Template defined in the Target URI using the assigned URI parameters
+        /// </summary>
+        /// <returns></returns>
         public Uri GetResolvedTarget()
         {
-            
             var uriTemplate = new UriTemplate(Target.OriginalString);
             ApplyParameters(uriTemplate);
             var resolvedTarget = new Uri(uriTemplate.Resolve(),UriKind.RelativeOrAbsolute);
             return resolvedTarget;
         }
 
+        /// <summary>
+        /// Returns list of parameters assigned to the link
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<LinkParameter> GetParameters()
         {
             return _Parameters.Values;
         }
 
+        /// <summary>
+        /// Add a hint to the link.  These hints can be used for serializing into representations on the server, or used to modify the behaviour of the CreateRequestMessage method
+        /// </summary>
+        /// <param name="hint"></param>
         public void AddHint(Hint hint)
         {
             _Hints.Add(hint.Name, hint);
         }
 
+        /// <summary>
+        /// Returns a list of assigned link hints
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Hint> GetHints()
         {
             return _Hints.Values;
         }
 
+        /// <summary>
+        /// Assign parameter value for use with URI templates
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="identifier">URL of documentation for this parameter</param>
         public void SetParameter(string name, object value, Uri identifier)
         {
             _Parameters[name] = new LinkParameter() { Name = name, Value = value, Identifier = identifier };
         }
+
+        /// <summary>
+        /// Assign parameter value for use with URI templates
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         public void SetParameter(string name, object value)
         {
             _Parameters[name] = new LinkParameter() {Name = name, Value = value};
         }
 
+        /// <summary>
+        /// Remove URI template parameter
+        /// </summary>
+        /// <param name="name"></param>
         public void UnsetParameter(string name)
         {
             _Parameters.Remove(name);
         }
+
 
         private void ApplyParameters(UriTemplate uriTemplate)
         {
@@ -203,14 +229,9 @@ namespace Tavis
             }
         }
 
-    }
+        private HttpRequestHeaders _requestHeaders;
+        private readonly Dictionary<string, LinkParameter> _Parameters = new Dictionary<string, LinkParameter>();
+        private readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
 
-    public class LinkParameter
-    {
-        public string Name { get; set; }
-        public object Value { get; set; }
-        public Uri Identifier { get; set; }
     }
-
-   
 }
