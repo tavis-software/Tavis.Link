@@ -124,6 +124,19 @@ namespace LinkTests
         }
 
 
+        // How do we deal with links that are not URI templates?
+        // If we have parameters that are set that are not in the URI template we have
+        // two choices.  Ignore it, or add it as a query param.
+        // How should URI template parameters interact with LinkParameters?
+        // Should link parameters be dependent on the Target?
+
+        // Proposal 1:  Link parameters are independent of target.  We expose a DiscoverParameter method that will create parameters
+        // from the URI template.
+        // 
+        // Proposal 2:  We discover parameters in the Target and update link parameters if they exist.  What happens if we have templated path
+        // parameter, but want to add query parameters.
+        // 
+
         [Fact]
         public void IdentifyParametersInTemplate()
         {

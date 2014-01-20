@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tavis.UriTemplates;
 
@@ -78,11 +80,8 @@ namespace Tavis
         /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest()
         {
-            Uri resolvedTarget = Target;
-            if (Target != null && Target.OriginalString.Contains("{"))
-            {
-                resolvedTarget = GetResolvedTarget();
-            }
+            Uri resolvedTarget = GetResolvedTarget();
+
             var requestMessage = new HttpRequestMessage()
                                      {
                                          Method = Method,
@@ -90,17 +89,15 @@ namespace Tavis
                                          Content = Content
                                      };
 
-            if (_requestHeaders != null)  // If _requestheaders were never accessed then there is nothing to copy
-            {
-                foreach (var httpRequestHeader in RequestHeaders)
-                {
-                    requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
-                }
-            }
+            CopyDefaultHeaders(requestMessage);
+
+            requestMessage = ApplyHints(requestMessage);
             
-            requestMessage.Headers.Referrer = Context;
+            return requestMessage;
+        }
 
-
+        private HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage)
+        {
             foreach (var hint in _Hints.Values)
             {
                 if (hint.ConfigureRequest != null)
@@ -108,8 +105,21 @@ namespace Tavis
                     requestMessage = hint.ConfigureRequest(hint, requestMessage);
                 }
             }
-            
             return requestMessage;
+        }
+
+        protected void CopyDefaultHeaders(HttpRequestMessage requestMessage)
+        {
+            if (_requestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
+            {
+                foreach (var httpRequestHeader in RequestHeaders)
+                {
+                    requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
+                }
+            }
+
+            requestMessage.Headers.Referrer = Context;
+
         }
 
         /// <summary>
@@ -146,10 +156,14 @@ namespace Tavis
         /// <returns></returns>
         public Uri GetResolvedTarget()
         {
-            var uriTemplate = new UriTemplate(Target.OriginalString);
-            ApplyParameters(uriTemplate);
-            var resolvedTarget = new Uri(uriTemplate.Resolve(),UriKind.RelativeOrAbsolute);
-            return resolvedTarget;
+            if (Target != null && Target.OriginalString.Contains("{"))
+            {
+                var uriTemplate = new UriTemplate(Target.OriginalString);
+                ApplyParameters(uriTemplate);
+                var resolvedTarget = new Uri(uriTemplate.Resolve(), UriKind.RelativeOrAbsolute);
+                return resolvedTarget;
+            }
+            return Target;
         }
 
         /// <summary>
@@ -209,6 +223,50 @@ namespace Tavis
             _Parameters.Remove(name);
         }
 
+        /// <summary>
+        /// Update target URI with query parameter tokens based on assigned parameters
+        /// </summary>
+        public void AddParametersAsTemplate(bool replaceQueryString = false)
+        {
+            var queryTokens = String.Join(",", _Parameters.Keys.
+                    Where(k => !Target.OriginalString.Contains("{" + k +"}"))
+                    .Select(p => p).ToArray());
+
+            string queryStringTemplate = null;
+            if (replaceQueryString == true || String.IsNullOrEmpty(Target.Query))
+            {
+                queryStringTemplate = "{?" + queryTokens + "}";
+            }
+            else
+            {
+                queryStringTemplate =  "{&" + queryTokens + "}";
+            }
+
+            var targetUri = Target.OriginalString;
+
+            if (replaceQueryString)
+            {
+                var queryStart = targetUri.IndexOf("?");
+                if (queryStart >= 0)
+                {
+                    targetUri = targetUri.Substring(0, queryStart);
+                }
+            }
+
+            Target = new Uri(targetUri + queryStringTemplate);
+        }
+
+
+        public void CreateParametersFromQueryString()
+        {
+            var reg = new Regex(@"([-A-Za-z0-9._~]*)=([^&]*)&?");		// Unreserved characters: http://tools.ietf.org/html/rfc3986#section-2.3
+            foreach (Match m in reg.Matches(Target.Query))
+            {
+                string key = m.Groups[1].Value.ToLowerInvariant();
+                string value = m.Groups[2].Value;
+                SetParameter(key,value);
+            }
+        }
 
         private void ApplyParameters(UriTemplate uriTemplate)
         {
@@ -228,6 +286,9 @@ namespace Tavis
                 }
             }
         }
+
+
+        
 
         private HttpRequestHeaders _requestHeaders;
         private readonly Dictionary<string, LinkParameter> _Parameters = new Dictionary<string, LinkParameter>();

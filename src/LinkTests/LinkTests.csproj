@@ -88,6 +88,7 @@
     <Compile Include="GuidServiceLinkTest.cs" />
     <Compile Include="HintTests.cs" />
     <Compile Include="LinkHeaderTests.cs" />
+    <Compile Include="LinkParameterTests.cs" />
     <Compile Include="LinkRegistryTests.cs" />
     <Compile Include="LinkTests.cs" />
     <Compile Include="NotFoundHandler.cs" />
