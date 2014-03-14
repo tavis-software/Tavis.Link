@@ -63,6 +63,39 @@ namespace LinkTests
         }
 
         [Fact]
+        public void Update_existing_parameters_in_query_string_automatically()
+        {
+            var link = new Link()
+            {
+                Target = new Uri("http://example/customer?view=true"),
+                AddNonTemplatedParametersToQueryString = true
+            };
+
+            link.SetParameter("view", false);
+
+
+            var resolvedTarget = link.GetResolvedTarget().OriginalString;
+            Assert.Equal("http://example/customer?view=False", resolvedTarget);
+        }
+
+
+        [Fact]
+        public void Update_existing_parameters_in_query_string()
+        {
+            var link = new Link()
+            {
+                Target = new Uri("http://example/customer?view=true")
+            };
+
+            link.SetParameter("view", false);
+
+            link.AddParametersAsTemplate();
+
+            var resolvedTarget = link.GetResolvedTarget().OriginalString;
+            Assert.Equal("http://example/customer?view=False", resolvedTarget);
+        }
+
+        [Fact]
         public void Add_multiple_parameters_to_uri()
         {
             var link = new Link()

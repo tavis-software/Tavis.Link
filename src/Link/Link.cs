@@ -20,7 +20,8 @@ namespace Tavis
     /// </summary>
     public class Link : LinkRfc
     {
-        
+        public bool AddNonTemplatedParametersToQueryString { get; set; }
+
         /// <summary>
         /// The HTTP method to be used when following this link, or creating a HTTPRequestMessage
         /// </summary>
@@ -156,13 +157,30 @@ namespace Tavis
         /// <returns></returns>
         public Uri GetResolvedTarget()
         {
-            if (Target != null && Target.OriginalString.Contains("{"))
+            if (Target != null )
             {
                 var uriTemplate = new UriTemplate(Target.OriginalString);
-                ApplyParameters(uriTemplate);
-                var resolvedTarget = new Uri(uriTemplate.Resolve(), UriKind.RelativeOrAbsolute);
-                return resolvedTarget;
+
+                if (AddNonTemplatedParametersToQueryString)
+                {
+                    var templateParameters = uriTemplate.GetParameterNames();
+                    if (_Parameters.Any(p => !templateParameters.Contains(p.Key)))
+                    {
+                        AddParametersAsTemplate();
+                        uriTemplate = new UriTemplate(Target.OriginalString);
+                    }
+                }
+
+                if (Target.OriginalString.Contains("{"))
+                {
+                    
+                    ApplyParameters(uriTemplate);
+                    var resolvedTarget = new Uri(uriTemplate.Resolve(), UriKind.RelativeOrAbsolute);
+                    return resolvedTarget;
+                }
+                
             }
+            
             return Target;
         }
 
@@ -226,11 +244,14 @@ namespace Tavis
         /// <summary>
         /// Update target URI with query parameter tokens based on assigned parameters
         /// </summary>
-        public void AddParametersAsTemplate(bool replaceQueryString = false)
+        public void AddParametersAsTemplate(bool? replaceQueryString = null)
         {
             var queryTokens = String.Join(",", _Parameters.Keys.
                     Where(k => !Target.OriginalString.Contains("{" + k +"}"))
                     .Select(p => p).ToArray());
+
+            // If query string already contains a parameter, then assume replace.
+            replaceQueryString = replaceQueryString ?? _Parameters.Keys.Any(k => Target.Query.Contains(k + "="));
 
             string queryStringTemplate = null;
             if (replaceQueryString == true || String.IsNullOrEmpty(Target.Query))
@@ -244,7 +265,7 @@ namespace Tavis
 
             var targetUri = Target.OriginalString;
 
-            if (replaceQueryString)
+            if (replaceQueryString == true)
             {
                 var queryStart = targetUri.IndexOf("?");
                 if (queryStart >= 0)

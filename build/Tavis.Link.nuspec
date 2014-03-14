@@ -2,15 +2,15 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>0.5.1</version>
+    <version>0.5.2</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Changed to a PCL library</releaseNotes>
+    <releaseNotes>Added new property to handle adding non-templated query string parameters</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
       	  <dependency id="Tavis.UriTemplates" version="0.4.0" />
-	  <dependency id="Microsoft.Net.Http" version="2.2.13" />
+	  <dependency id="Microsoft.Net.Http" version="2.2.18" />
 	  <dependency id="Newtonsoft.Json" version="5.0.8" />
 	</dependencies>
   </metadata>
