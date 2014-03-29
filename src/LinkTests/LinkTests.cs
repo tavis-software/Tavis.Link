@@ -222,16 +222,6 @@ namespace LinkTests
         }
 
 
-        [Fact]
-        public void ExecutePublicWebUrl()
-        {
-            var link = new BingMapLink();
-            link.SetCoordinates(45,-73);
-
-            var request = link.CreateRequest();
-
-            Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
-        }
 
         [Fact]
         public void CreateJson()
@@ -292,18 +282,7 @@ namespace LinkTests
 
     }
 
-    public class TranslationLink : Link {
-
-        public TranslationLink() {
-            Target = new Uri("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&tl={tolanguage}&q={fromphrase}");
-        }
-
-        public void SetParameters(string fromLanguage, string toLanguage, string fromPhrase) {
-            SetParameter("fromlanguage",fromLanguage);
-            SetParameter("tolanguage", toLanguage);
-            SetParameter("fromphrase", fromPhrase);
-        }
-    }
+    
 
     public class FakeMessageHandler : HttpMessageHandler
     {

@@ -116,4 +116,9 @@ namespace Tavis.OAuth
             return token;
         }
     }
+
+    public class OauthTokenRequestBody
+    {
+        
+    }
 }

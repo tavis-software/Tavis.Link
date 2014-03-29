@@ -67,7 +67,7 @@ namespace Tavis
         /// <remarks>
         /// The empty constructor makes it easier for deserializers to create links.
         /// </remarks>
-        public Link() : base()
+        public Link()
         {
             Method = HttpMethod.Get;
             Relation = LinkHelper.GetLinkRelationTypeName(GetType());
@@ -81,25 +81,34 @@ namespace Tavis
         /// <returns></returns>
         public virtual HttpRequestMessage CreateRequest()
         {
-            Uri resolvedTarget = GetResolvedTarget();
+            var requestMessage = CreateRequest(_Parameters.ToDictionary(k => k.Key, v => v.Value.Value), Target);
 
-            var requestMessage = new HttpRequestMessage()
-                                     {
-                                         Method = Method,
-                                         RequestUri = resolvedTarget,
-                                         Content = Content
-                                     };
-
-            CopyDefaultHeaders(requestMessage);
-
-            requestMessage = ApplyHints(requestMessage);
-            
             return requestMessage;
         }
 
-        private HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage)
+     
+
+        public virtual HttpRequestMessage CreateRequest(Dictionary<string, object> linkParameters, Uri target = null)
         {
-            foreach (var hint in _Hints.Values)
+            target = target ?? Target;
+            Uri resolvedTarget = GetResolvedTarget(target, linkParameters.ToDictionary(k => k.Key, v => v.Value), AddNonTemplatedParametersToQueryString);
+
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = Method,
+                RequestUri = resolvedTarget,
+                Content = Content
+            };
+
+            if (_requestHeaders != null) CopyDefaultHeaders(requestMessage, _requestHeaders);
+
+            requestMessage = ApplyHints(requestMessage, _Hints);
+            return requestMessage;
+        }
+
+        private static HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage, Dictionary<string, Hint> hints)
+        {
+            foreach (var hint in hints.Values)
             {
                 if (hint.ConfigureRequest != null)
                 {
@@ -109,11 +118,11 @@ namespace Tavis
             return requestMessage;
         }
 
-        protected void CopyDefaultHeaders(HttpRequestMessage requestMessage)
+        protected void CopyDefaultHeaders(HttpRequestMessage requestMessage, HttpRequestHeaders defaultRequestHeaders)
         {
-            if (_requestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
+            if (defaultRequestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
             {
-                foreach (var httpRequestHeader in RequestHeaders)
+                foreach (var httpRequestHeader in defaultRequestHeaders)
                 {
                     requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
                 }
@@ -157,32 +166,35 @@ namespace Tavis
         /// <returns></returns>
         public Uri GetResolvedTarget()
         {
-            if (Target != null )
-            {
-                var uriTemplate = new UriTemplate(Target.OriginalString);
-
-                if (AddNonTemplatedParametersToQueryString)
-                {
-                    var templateParameters = uriTemplate.GetParameterNames();
-                    if (_Parameters.Any(p => !templateParameters.Contains(p.Key)))
-                    {
-                        AddParametersAsTemplate();
-                        uriTemplate = new UriTemplate(Target.OriginalString);
-                    }
-                }
-
-                if (Target.OriginalString.Contains("{"))
-                {
-                    
-                    ApplyParameters(uriTemplate);
-                    var resolvedTarget = new Uri(uriTemplate.Resolve(), UriKind.RelativeOrAbsolute);
-                    return resolvedTarget;
-                }
-                
-            }
-            
-            return Target;
+            return GetResolvedTarget(Target, _Parameters.ToDictionary(k=>k.Key,v=> v.Value.Value), AddNonTemplatedParametersToQueryString);
         }
+
+        private static Uri GetResolvedTarget(Uri resolvedTarget, Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString)
+        {
+            if (resolvedTarget == null) return null;
+
+            var uriTemplate = new UriTemplate(resolvedTarget.OriginalString);
+
+            if (addNonTemplatedParametersToQueryString)
+            {
+                var templateParameters = uriTemplate.GetParameterNames();
+                if (linkParameters.Any(p => !templateParameters.Contains(p.Key)))
+                {
+                    resolvedTarget = AddParametersToQueryString(null, linkParameters.Keys.ToArray(), resolvedTarget);
+                    uriTemplate = new UriTemplate(resolvedTarget.OriginalString);
+                }
+            }
+
+            if (resolvedTarget.OriginalString.Contains("{"))
+            {
+                ApplyParametersToTemplate(uriTemplate, linkParameters);
+                resolvedTarget = new Uri(uriTemplate.Resolve(), UriKind.RelativeOrAbsolute);
+                return resolvedTarget;
+            }
+
+            return resolvedTarget;
+        }
+
 
         /// <summary>
         /// Returns list of parameters assigned to the link
@@ -219,7 +231,7 @@ namespace Tavis
         /// <param name="identifier">URL of documentation for this parameter</param>
         public void SetParameter(string name, object value, Uri identifier)
         {
-            _Parameters[name] = new LinkParameter() { Name = name, Value = value, Identifier = identifier };
+            _Parameters[name] = new LinkParameter { Name = name, Value = value, Identifier = identifier };
         }
 
         /// <summary>
@@ -229,7 +241,7 @@ namespace Tavis
         /// <param name="value"></param>
         public void SetParameter(string name, object value)
         {
-            _Parameters[name] = new LinkParameter() {Name = name, Value = value};
+            _Parameters[name] = new LinkParameter {Name = name, Value = value};
         }
 
         /// <summary>
@@ -246,24 +258,29 @@ namespace Tavis
         /// </summary>
         public void AddParametersAsTemplate(bool? replaceQueryString = null)
         {
-            var queryTokens = String.Join(",", _Parameters.Keys.
-                    Where(k => !Target.OriginalString.Contains("{" + k +"}"))
-                    .Select(p => p).ToArray());
+            Target = AddParametersToQueryString(replaceQueryString, _Parameters.Keys.ToArray(), Target);
+        }
+
+        private static Uri AddParametersToQueryString(bool? replaceQueryString, string[] linkParameters, Uri target)
+        {
+            var queryTokens = String.Join(",", linkParameters.
+                Where(k => !target.OriginalString.Contains("{" + k + "}"))
+                .Select(p => p).ToArray());
 
             // If query string already contains a parameter, then assume replace.
-            replaceQueryString = replaceQueryString ?? _Parameters.Keys.Any(k => Target.Query.Contains(k + "="));
+            replaceQueryString = replaceQueryString ?? linkParameters.Any(k => target.Query.Contains(k + "="));
 
             string queryStringTemplate = null;
-            if (replaceQueryString == true || String.IsNullOrEmpty(Target.Query))
+            if (replaceQueryString == true || String.IsNullOrEmpty(target.Query))
             {
                 queryStringTemplate = "{?" + queryTokens + "}";
             }
             else
             {
-                queryStringTemplate =  "{&" + queryTokens + "}";
+                queryStringTemplate = "{&" + queryTokens + "}";
             }
 
-            var targetUri = Target.OriginalString;
+            var targetUri = target.OriginalString;
 
             if (replaceQueryString == true)
             {
@@ -274,7 +291,7 @@ namespace Tavis
                 }
             }
 
-            Target = new Uri(targetUri + queryStringTemplate);
+            return new Uri(targetUri + queryStringTemplate);
         }
 
 
@@ -289,21 +306,21 @@ namespace Tavis
             }
         }
 
-        private void ApplyParameters(UriTemplate uriTemplate)
+        private static void ApplyParametersToTemplate(UriTemplate uriTemplate, Dictionary<string, object> linkParameters)
         {
-            foreach (var parameter in _Parameters)
+            foreach (var parameter in linkParameters)
             {
-                if (parameter.Value.Value is IEnumerable<string>)
+                if (parameter.Value is IEnumerable<string>)
                 {
-                    uriTemplate.SetParameter(parameter.Key, (IEnumerable<string>)parameter.Value.Value);
+                    uriTemplate.SetParameter(parameter.Key, (IEnumerable<string>)parameter.Value);
                 }
-                else if (parameter.Value.Value is IDictionary<string, string>)
+                else if (parameter.Value is IDictionary<string, string>)
                 {
-                    uriTemplate.SetParameter(parameter.Key, (IDictionary<string, string>)parameter.Value.Value);
+                    uriTemplate.SetParameter(parameter.Key, (IDictionary<string, string>)parameter.Value);
                 }
                 else
                 {
-                    uriTemplate.SetParameter(parameter.Key, parameter.Value.Value.ToString());
+                    uriTemplate.SetParameter(parameter.Key, parameter.Value.ToString());
                 }
             }
         }

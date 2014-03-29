@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Tavis.OAuth
@@ -6,29 +7,24 @@ namespace Tavis.OAuth
     [LinkRelationType("oauth2-authorize")]
     public class OAuth2AuthorizeLink : Link
     {
-        public Uri AuthorizationServer { get; set; }
-        
-        public string ClientId { get; set; }
-        public string ResponseType { get; set; }
-        public Uri RedirectUri { get; set; }
-        public string[] Scope { get; set; }
-        public string State { get; set; }
+ 
 
-        public override HttpRequestMessage CreateRequest()
+        public HttpRequestMessage CreateRequest(string clientId, string responseType, Uri redirectUri, string[] scope, string state)
         {
-            Target = new Uri(AuthorizationServer, "{?client_id,scope,response_type,redirect_uri,state}");
+            var values = new Dictionary<string, object>
+            {
+                {"client_id", clientId},
+                {"scope", responseType},
+                {"response_type", redirectUri},
+                {"redirect_uri", scope},
+                {"state", state}
+            };
 
-            SetParameter("client_id", ClientId);
-            SetParameter("scope", string.Join(" ",Scope));
-            SetParameter("response_type", ResponseType);
-            SetParameter("redirect_uri", RedirectUri.OriginalString);
-            SetParameter("state", State);
+            var target = new Uri(Target, "{?client_id,scope,response_type,redirect_uri,state}");
+            return base.CreateRequest(values, target);
 
-            var request = base.CreateRequest();
-            request.Method = HttpMethod.Get;
-
-            return request;
         }
+
 
     }
 }
