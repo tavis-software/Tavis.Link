@@ -53,13 +53,9 @@ namespace Tavis
         /// Create an HTTPRequestMessage based on the information stored in the link.
         /// </summary>
         /// <returns></returns>
-        public HttpRequestMessage BuildRequestMessage()
+        public HttpRequestMessage BuildRequestMessage(HttpMethod method = null , HttpContent content = null)
         {
-            return BuildRequestMessage(null, HttpMethod.Get);
-        }
-
-        public HttpRequestMessage BuildRequestMessage(HttpMethod method , HttpContent content = null)
-        {
+            if (method == null) method = HttpMethod.Get;
             return BuildRequestMessage(null, method, content);
         }
 
@@ -149,17 +145,6 @@ namespace Tavis
             return requestMessage;
         }
 
-        public static void CopyDefaultHeaders(HttpRequestMessage requestMessage, HttpRequestHeaders defaultRequestHeaders)
-        {
-            if (defaultRequestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
-            {
-                foreach (var httpRequestHeader in defaultRequestHeaders)
-                {
-                    requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
-                }
-            }
-
-        }
 
         public static Uri GetResolvedTarget(Uri resolvedTarget, Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString)
         {
@@ -243,30 +228,5 @@ namespace Tavis
 
         private readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
 
-    }
-
-
-
-    public class DefaultRequestBuilder : IHttpRequestBuilder
-    {
-     
-
-        public HttpRequestMessage Build(Link link,Dictionary<string, object> uriParameters, HttpMethod method,  HttpContent content)
-        {
-
-            Uri resolvedTarget = Link.GetResolvedTarget(link.Target, uriParameters, link.AddNonTemplatedParametersToQueryString);
-
-            var requestMessage = new HttpRequestMessage
-            {
-                Method = method,
-                RequestUri = resolvedTarget,
-                Content = content
-            };
-
-            //if (link.RequestHeaders != null) Link.CopyDefaultHeaders(requestMessage, link.RequestHeaders);
-
-            requestMessage = Link.ApplyHints(requestMessage, link.GetHints());
-            return requestMessage;
-        }
     }
 }

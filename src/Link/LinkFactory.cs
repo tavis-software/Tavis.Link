@@ -131,14 +131,26 @@ namespace Tavis
             reg.ResponseHandler = handler;
         }
 
-        
 
-        public void SetRequestBuilder<T>(DelegatingRequestBuilder builder) where T : Link, new()
+        public void SetRequestBuilder<T>(IEnumerable<DelegatingRequestBuilder> builders) where T : Link, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
-            reg.RequestBuilder = builder;
+
+            IHttpRequestBuilder builderList = new DefaultRequestBuilder();
+            foreach (var requestBuilder in builders.Reverse())
+            {
+                requestBuilder.InnerBuilder = builderList;
+                builderList = (IHttpRequestBuilder) requestBuilder;
+            }
+            reg.RequestBuilder = builderList;
         }
+
+        public void SetRequestBuilder<T>(DelegatingRequestBuilder builder) where T : Link, new()
+        {
+            SetRequestBuilder<T>(new []{builder});
+        }
+
         public void SetRequestBuilder(Type linkType, DelegatingRequestBuilder builder) 
         {
             var t = (Link)Activator.CreateInstance(linkType);
@@ -177,19 +189,8 @@ namespace Tavis
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
             t.HttpResponseHandler = reg.ResponseHandler;
-
-            if (reg.RequestBuilder != null)
-            {
-                if (reg.RequestBuilder is DelegatingRequestBuilder)
-                {
-                    t.AddRequestBuilder((DelegatingRequestBuilder)reg.RequestBuilder);
-                }
-                else
-                {
-                    t.HttpRequestBuilder = reg.RequestBuilder;
-                }
-                
-            }
+            if (reg.RequestBuilder != null) t.HttpRequestBuilder = reg.RequestBuilder;
+            
             return t;
         }
 

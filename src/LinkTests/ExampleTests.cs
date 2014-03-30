@@ -49,16 +49,14 @@ namespace LinkTests
         public void Add_accept_header_to_stylesheet_link()
         {
             var linkFactory = new LinkFactory();
-            var builder = new AcceptHeaderRequestBuilder(new[] {new MediaTypeWithQualityHeaderValue("text/css")})
-            {
-                InnerBuilder =
-                    new ActionRequestBuilder(
-                        r => r.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip")))
-            };
-            
 
-            linkFactory.SetRequestBuilder<StylesheetLink>(builder);
-            
+            var builders = new List<DelegatingRequestBuilder>()
+            {
+                new AcceptHeaderRequestBuilder(new[] {new MediaTypeWithQualityHeaderValue("text/css")}),
+                new ActionRequestBuilder(r => r.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip")))
+            };
+
+            linkFactory.SetRequestBuilder<StylesheetLink>(builders);
 
             var aboutlink = linkFactory.CreateLink<StylesheetLink>();
             aboutlink.Target = new Uri("http://example.org/about");
@@ -160,63 +158,13 @@ namespace LinkTests
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
 
 
-            var request = relatedLink.BuildRequestMessage(HttpMethod.Head, new StringContent(""));
+            var request = relatedLink.BuildRequestMessage(HttpMethod.Post, new StringContent(""));
 
-            Assert.Equal(HttpMethod.Head, request.Method);
+            Assert.Equal(HttpMethod.Post, request.Method);
         }
         
 
 
-        //Todo: Should we be allowed to build a request that has no URI?  Maybe this should fail 
-        [Fact]
-        public void Given_no_uri_build_a_request()
-        {
-
-            Uri uri = null;
-
-            var link = new Link();
-
-            var request = link.BuildRequestMessage();
-
-            Assert.Equal(uri, request.RequestUri);
-        }
-
-
-        [Fact]
-        public void Build_request_with_non_default_http_method()
-        {
-
-            Uri uri = null;
-
-            var link = new Link();
-
-            var request = link.BuildRequestMessage();
-
-            Assert.Equal(uri, request.RequestUri);
-        }
     
     }
-
-    public class AcceptHeaderRequestBuilder : DelegatingRequestBuilder
-    {
-        private readonly IEnumerable<MediaTypeWithQualityHeaderValue> _AcceptHeader;
-
-        public AcceptHeaderRequestBuilder(IEnumerable<MediaTypeWithQualityHeaderValue> acceptHeaders )
-        {
-            _AcceptHeader = acceptHeaders;
-        }
-
-        public override HttpRequestMessage Build(Link link, Dictionary<string, object> uriParameters, HttpMethod method, HttpContent content)
-        {
-            var request = base.Build(link, uriParameters, method, content);
-            request.Headers.Accept.Clear();
-            foreach (var headerValue in _AcceptHeader)
-            {
-                request.Headers.Accept.Add(headerValue);    
-            }
-            return request;
-        }
-    }
-
-
 }

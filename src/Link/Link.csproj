@@ -72,6 +72,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionResponseHandler.cs" />
+    <Compile Include="DefaultRequestBuilder.cs" />
     <Compile Include="Hint.cs" />
     <Compile Include="HintFactory.cs" />
     <Compile Include="HttpClientExtensions.cs" />
