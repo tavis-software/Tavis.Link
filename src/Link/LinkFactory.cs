@@ -14,7 +14,6 @@ namespace Tavis
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -23,7 +22,24 @@ namespace Tavis
         /// <summary>
         /// 
         /// </summary>
-        public LinkFactory()
+        public LinkFactory(bool includeIANALinks = true)
+        {
+            if (includeIANALinks)
+            {
+                RegisterIANALinks();
+            }
+            HintFactory = new HintFactory();  // Default hintfactory
+        }
+
+        public IEnumerable<LinkRegistration> Registrations
+        {
+            get
+            {
+                return _LinkRegistry.Values;
+            }
+        }
+
+        private void RegisterIANALinks()
         {
             // Register all official IANA link types
             AddLinkType<AboutLink>();
@@ -91,9 +107,6 @@ namespace Tavis
             AddLinkType<ViaLink>();
             AddLinkType<WorkingCopyLink>();
             AddLinkType<WorkingCopyOfLink>();
-
-            HintFactory = new HintFactory();  // Default hintfactory
-
         }
 
         /// <summary>
@@ -118,6 +131,20 @@ namespace Tavis
             reg.ResponseHandler = handler;
         }
 
+        
+
+        public void SetRequestBuilder<T>(DelegatingRequestBuilder builder) where T : Link, new()
+        {
+            var t = new T();
+            var reg = _LinkRegistry[t.Relation];
+            reg.RequestBuilder = builder;
+        }
+        public void SetRequestBuilder(Type linkType, DelegatingRequestBuilder builder) 
+        {
+            var t = (Link)Activator.CreateInstance(linkType);
+            var reg = _LinkRegistry[t.Relation];
+            reg.RequestBuilder = builder;
+        }
 
         /// <summary>
         /// 
@@ -150,16 +177,36 @@ namespace Tavis
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
             t.HttpResponseHandler = reg.ResponseHandler;
-            return t;
 
+            if (reg.RequestBuilder != null)
+            {
+                if (reg.RequestBuilder is DelegatingRequestBuilder)
+                {
+                    t.AddRequestBuilder((DelegatingRequestBuilder)reg.RequestBuilder);
+                }
+                else
+                {
+                    t.HttpRequestBuilder = reg.RequestBuilder;
+                }
+                
+            }
+            return t;
         }
+
+        public T CreateLink<T>(Uri url) where T : Link, new()
+        {
+            var link = CreateLink<T>();
+            link.Target = url;
+            return link;
+        }
+
     }
 
-    internal class LinkRegistration
+    public class LinkRegistration
     {
         public Type LinkType { get; set; }
         public IHttpResponseHandler ResponseHandler { get; set; }
-
+        public IHttpRequestBuilder RequestBuilder { get; set; }
     }
 
    

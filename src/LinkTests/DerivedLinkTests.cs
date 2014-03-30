@@ -92,7 +92,7 @@ namespace LinkTests
                 {"fromphrase", fromPhrase}
             };
 
-            return base.CreateRequest(parameters, Target);
+            return base.BuildRequestMessage(parameters);
         }
     }
 
@@ -114,7 +114,7 @@ namespace LinkTests
                 {"long", longitude},
                 {"level", level}
             };
-            return base.CreateRequest(parameters, Target);
+            return base.BuildRequestMessage(parameters);
         }
     }
 

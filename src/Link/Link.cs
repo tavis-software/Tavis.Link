@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tavis.UriTemplates;
@@ -23,43 +25,17 @@ namespace Tavis
         public bool AddNonTemplatedParametersToQueryString { get; set; }
 
         /// <summary>
-        /// The HTTP method to be used when following this link, or creating a HTTPRequestMessage
-        /// </summary>
-        public HttpMethod Method { get; set; }
-        
-        /// <summary>
-        /// The HTTPContent to be sent with the HTTP request when following this link or creating a HTTPRequestMessage
-        /// </summary>
-        public HttpContent Content { get; set; }
-        
-      
-        /// <summary>
-        /// The Request headers to be used when following this link or creating a HttpRequestMessage.
-        /// </summary>
-        /// <remarks>
-        /// HttpRequestMessage instances can only be used once.  Using a link class as a factory for HttpRequestMessages makes it easier to make multiple similar requests.  
-        /// </remarks>
-        public HttpRequestHeaders RequestHeaders
-        {
-            get
-            {
-                if (_requestHeaders == null)
-                {
-                    var dummyMessage = new HttpRequestMessage();  // Create fake request because RequestHeaders constructor is internal
-                    _requestHeaders = dummyMessage.Headers;
-                }
-                return _requestHeaders;
-            }
-            
-        }
-
-        /// <summary>
         /// A handler with knowledge of how to process the response to following a link.  
         /// </summary>
         /// <remarks>
         /// The use of reponse handlers is completely optional.  They become valuable when media type deserializers use the LinkFactory which is has behaviours pre-registered
         /// </remarks>
         public IHttpResponseHandler HttpResponseHandler { get; set; }
+
+        /// <summary>
+        /// Extension point for changing the way this Link builds HttpRequestMessages
+        /// </summary>
+        public IHttpRequestBuilder HttpRequestBuilder { get; set; }
 
         /// <summary>
         /// Create an instance of a link.  
@@ -69,67 +45,36 @@ namespace Tavis
         /// </remarks>
         public Link()
         {
-            Method = HttpMethod.Get;
             Relation = LinkHelper.GetLinkRelationTypeName(GetType());
-
+            HttpRequestBuilder = new DefaultRequestBuilder();
         }
 
         /// <summary>
         /// Create an HTTPRequestMessage based on the information stored in the link.
         /// </summary>
-        /// <remarks>This method can be overloaded to provide custom behaviour when creating the link.  </remarks>
         /// <returns></returns>
-        public virtual HttpRequestMessage CreateRequest()
+        public HttpRequestMessage BuildRequestMessage()
         {
-            var requestMessage = CreateRequest(_Parameters.ToDictionary(k => k.Key, v => v.Value.Value), Target);
-
-            return requestMessage;
+            return BuildRequestMessage(null, HttpMethod.Get);
         }
 
-     
-
-        public virtual HttpRequestMessage CreateRequest(Dictionary<string, object> linkParameters, Uri target = null)
+        public HttpRequestMessage BuildRequestMessage(HttpMethod method , HttpContent content = null)
         {
-            target = target ?? Target;
-            Uri resolvedTarget = GetResolvedTarget(target, linkParameters.ToDictionary(k => k.Key, v => v.Value), AddNonTemplatedParametersToQueryString);
-
-            var requestMessage = new HttpRequestMessage
-            {
-                Method = Method,
-                RequestUri = resolvedTarget,
-                Content = Content
-            };
-
-            if (_requestHeaders != null) CopyDefaultHeaders(requestMessage, _requestHeaders);
-
-            requestMessage = ApplyHints(requestMessage, _Hints);
-            return requestMessage;
+            return BuildRequestMessage(null, method, content);
         }
 
-        private static HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage, Dictionary<string, Hint> hints)
+        public HttpRequestMessage BuildRequestMessage(Dictionary<string, object> linkParameters, HttpMethod method = null, HttpContent content = null)
         {
-            foreach (var hint in hints.Values)
-            {
-                if (hint.ConfigureRequest != null)
-                {
-                    requestMessage = hint.ConfigureRequest(hint, requestMessage);
-                }
-            }
-            return requestMessage;
+            if (linkParameters == null) linkParameters = new Dictionary<string, object>();
+            if (method == null) method = HttpMethod.Get;
+
+            return HttpRequestBuilder.Build(this, linkParameters, method, content);
         }
 
-        protected void CopyDefaultHeaders(HttpRequestMessage requestMessage, HttpRequestHeaders defaultRequestHeaders)
+        public void AddRequestBuilder(DelegatingRequestBuilder requestBuilder)
         {
-            if (defaultRequestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
-            {
-                foreach (var httpRequestHeader in defaultRequestHeaders)
-                {
-                    requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
-                }
-            }
-
-            requestMessage.Headers.Referrer = Context;
-
+            requestBuilder.InnerBuilder = HttpRequestBuilder;
+            HttpRequestBuilder = requestBuilder;
         }
 
         /// <summary>
@@ -147,7 +92,6 @@ namespace Tavis
             tcs.SetResult(responseMessage);
             return tcs.Task;
         }
-
     
         /// <summary>
         /// Returns list of URI Template parameters specified in the Target URI
@@ -161,15 +105,63 @@ namespace Tavis
 
 
         /// <summary>
-        /// Resolves the URI Template defined in the Target URI using the assigned URI parameters
+        /// Add a hint to the link.  These hints can be used for serializing into representations on the server, or used to modify the behaviour of the CreateRequestMessage method
         /// </summary>
-        /// <returns></returns>
-        public Uri GetResolvedTarget()
+        /// <param name="hint"></param>
+        public void AddHint(Hint hint)
         {
-            return GetResolvedTarget(Target, _Parameters.ToDictionary(k=>k.Key,v=> v.Value.Value), AddNonTemplatedParametersToQueryString);
+            _Hints.Add(hint.Name, hint);
         }
 
-        private static Uri GetResolvedTarget(Uri resolvedTarget, Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString)
+        /// <summary>
+        /// Returns a list of assigned link hints
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<Hint> GetHints()
+        {
+            return _Hints.Values;
+        }
+
+        public Dictionary<string, object> GetQueryStringParameters()
+        {
+            Uri uri = Target;
+            var parameters = new Dictionary<string, object>();
+
+            var reg = new Regex(@"([-A-Za-z0-9._~]*)=([^&]*)&?");		// Unreserved characters: http://tools.ietf.org/html/rfc3986#section-2.3
+            foreach (Match m in reg.Matches(uri.Query))
+            {
+                string key = m.Groups[1].Value.ToLowerInvariant();
+                string value = m.Groups[2].Value;
+                parameters.Add(key, value);
+            }
+            return parameters;
+        }
+
+        public static HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage, IEnumerable<Hint> hints)
+        {
+            foreach (var hint in hints)
+            {
+                if (hint.ConfigureRequest != null)
+                {
+                    requestMessage = hint.ConfigureRequest(hint, requestMessage);
+                }
+            }
+            return requestMessage;
+        }
+
+        public static void CopyDefaultHeaders(HttpRequestMessage requestMessage, HttpRequestHeaders defaultRequestHeaders)
+        {
+            if (defaultRequestHeaders != null) // If _requestheaders were never accessed then there is nothing to copy
+            {
+                foreach (var httpRequestHeader in defaultRequestHeaders)
+                {
+                    requestMessage.Headers.Add(httpRequestHeader.Key, httpRequestHeader.Value);
+                }
+            }
+
+        }
+
+        public static Uri GetResolvedTarget(Uri resolvedTarget, Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString)
         {
             if (resolvedTarget == null) return null;
 
@@ -195,71 +187,7 @@ namespace Tavis
             return resolvedTarget;
         }
 
-
-        /// <summary>
-        /// Returns list of parameters assigned to the link
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<LinkParameter> GetParameters()
-        {
-            return _Parameters.Values;
-        }
-
-        /// <summary>
-        /// Add a hint to the link.  These hints can be used for serializing into representations on the server, or used to modify the behaviour of the CreateRequestMessage method
-        /// </summary>
-        /// <param name="hint"></param>
-        public void AddHint(Hint hint)
-        {
-            _Hints.Add(hint.Name, hint);
-        }
-
-        /// <summary>
-        /// Returns a list of assigned link hints
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<Hint> GetHints()
-        {
-            return _Hints.Values;
-        }
-
-        /// <summary>
-        /// Assign parameter value for use with URI templates
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        /// <param name="identifier">URL of documentation for this parameter</param>
-        public void SetParameter(string name, object value, Uri identifier)
-        {
-            _Parameters[name] = new LinkParameter { Name = name, Value = value, Identifier = identifier };
-        }
-
-        /// <summary>
-        /// Assign parameter value for use with URI templates
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        public void SetParameter(string name, object value)
-        {
-            _Parameters[name] = new LinkParameter {Name = name, Value = value};
-        }
-
-        /// <summary>
-        /// Remove URI template parameter
-        /// </summary>
-        /// <param name="name"></param>
-        public void UnsetParameter(string name)
-        {
-            _Parameters.Remove(name);
-        }
-
-        /// <summary>
-        /// Update target URI with query parameter tokens based on assigned parameters
-        /// </summary>
-        public void AddParametersAsTemplate(bool? replaceQueryString = null)
-        {
-            Target = AddParametersToQueryString(replaceQueryString, _Parameters.Keys.ToArray(), Target);
-        }
+        
 
         private static Uri AddParametersToQueryString(bool? replaceQueryString, string[] linkParameters, Uri target)
         {
@@ -294,18 +222,6 @@ namespace Tavis
             return new Uri(targetUri + queryStringTemplate);
         }
 
-
-        public void CreateParametersFromQueryString()
-        {
-            var reg = new Regex(@"([-A-Za-z0-9._~]*)=([^&]*)&?");		// Unreserved characters: http://tools.ietf.org/html/rfc3986#section-2.3
-            foreach (Match m in reg.Matches(Target.Query))
-            {
-                string key = m.Groups[1].Value.ToLowerInvariant();
-                string value = m.Groups[2].Value;
-                SetParameter(key,value);
-            }
-        }
-
         private static void ApplyParametersToTemplate(UriTemplate uriTemplate, Dictionary<string, object> linkParameters)
         {
             foreach (var parameter in linkParameters)
@@ -325,12 +241,32 @@ namespace Tavis
             }
         }
 
-
-        
-
-        private HttpRequestHeaders _requestHeaders;
-        private readonly Dictionary<string, LinkParameter> _Parameters = new Dictionary<string, LinkParameter>();
         private readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
 
+    }
+
+
+
+    public class DefaultRequestBuilder : IHttpRequestBuilder
+    {
+     
+
+        public HttpRequestMessage Build(Link link,Dictionary<string, object> uriParameters, HttpMethod method,  HttpContent content)
+        {
+
+            Uri resolvedTarget = Link.GetResolvedTarget(link.Target, uriParameters, link.AddNonTemplatedParametersToQueryString);
+
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = method,
+                RequestUri = resolvedTarget,
+                Content = content
+            };
+
+            //if (link.RequestHeaders != null) Link.CopyDefaultHeaders(requestMessage, link.RequestHeaders);
+
+            requestMessage = Link.ApplyHints(requestMessage, link.GetHints());
+            return requestMessage;
+        }
     }
 }

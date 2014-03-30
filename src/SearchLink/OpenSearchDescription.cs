@@ -12,6 +12,7 @@ namespace Tavis.Search
         public string Description { get; set; }
         public string InputEncoding { get; set; }
         public Link Url { get; set; }
+        public HttpMethod Method { get; set; }
 
         public OpenSearchDescription(MediaTypeHeaderValue contentType, Stream stream) : this(XDocument.Load(stream))
         {
@@ -35,9 +36,10 @@ namespace Tavis.Search
             Url = new Link()
                 {
                     Target = new Uri(url.Attribute("template").Value),
-                    Method = new HttpMethod(url.Attribute("method").Value.ToUpper()),
                     Type = new MediaTypeWithQualityHeaderValue(url.Attribute("type").Value)
                 };
+            Url.AddRequestBuilder(new ActionRequestBuilder((r) => r.Method = new HttpMethod(url.Attribute("method").Value.ToUpper()))); 
+
         }
     }
 }

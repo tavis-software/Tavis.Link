@@ -14,15 +14,15 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer")
+                Target = new Uri("http://example/customer"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("id",99);
+            
+            var request = link.BuildRequestMessage(new Dictionary<string, object> {{"id", 99}});
 
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?id=99", resolvedTarget);
+            
+            Assert.Equal("http://example/customer?id=99", request.RequestUri.OriginalString);
         }
 
 
@@ -31,15 +31,14 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer?view=true")
+                Target = new Uri("http://example/customer?view=true"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("id", 99);
+            
 
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?view=true&id=99", resolvedTarget);
+            var request = link.BuildRequestMessage(new Dictionary<string,object> {{"id", 99}});
+            Assert.Equal("http://example/customer?view=true&id=99", request.RequestUri.OriginalString);
         }
 
 
@@ -50,16 +49,18 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer/{id}?view=true")
+                Target = new Uri("http://example/customer/{id}?view=true"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("id", 99);
-            link.SetParameter("context", "detail");
+            
 
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer/99?view=true&context=detail", resolvedTarget);
+            var request = link.BuildRequestMessage(new Dictionary<string, object>
+            {
+                {"id", 99},
+                {"context", "detail"}
+            });
+            Assert.Equal("http://example/customer/99?view=true&context=detail", request.RequestUri.OriginalString);
         }
 
         [Fact]
@@ -71,11 +72,9 @@ namespace LinkTests
                 AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("view", false);
-
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?view=False", resolvedTarget);
+            var request = link.BuildRequestMessage(new Dictionary<string, object> {{"view", false}});
+            
+            Assert.Equal("http://example/customer?view=False", request.RequestUri.OriginalString);
         }
 
 
@@ -84,15 +83,13 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer?view=true")
+                Target = new Uri("http://example/customer?view=true"),
+                AddNonTemplatedParametersToQueryString =  true
             };
 
-            link.SetParameter("view", false);
-
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?view=False", resolvedTarget);
+            
+            var request = link.BuildRequestMessage(new Dictionary<string,object> {{"view", false}});
+            Assert.Equal("http://example/customer?view=False", request.RequestUri.OriginalString);
         }
 
         [Fact]
@@ -100,16 +97,18 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer")
+                Target = new Uri("http://example/customer"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("id", 99);
-            link.SetParameter("view", false);
+            
 
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?id=99&view=False", resolvedTarget);
+            var request = link.BuildRequestMessage(new Dictionary<string, object>
+            {
+                {"id", 99},
+                {"view", false}
+            });
+            Assert.Equal("http://example/customer?id=99&view=False", request.RequestUri.OriginalString);
         }
 
 
@@ -118,14 +117,12 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer")
+                Target = new Uri("http://example/customer"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-
-            link.AddParametersAsTemplate();
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer", resolvedTarget);
+            var request = link.BuildRequestMessage();
+            Assert.Equal("http://example/customer", request.RequestUri.OriginalString);
         }
 
         [Fact]
@@ -133,15 +130,13 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer?view=False")
+                Target = new Uri("http://example/customer?view=False"),
+                AddNonTemplatedParametersToQueryString = true
             };
 
-            link.SetParameter("view",true);
 
-            link.AddParametersAsTemplate(true);
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?view=True", resolvedTarget);
+            var request = link.BuildRequestMessage(new Dictionary<string, object> {{"view", true}});
+            Assert.Equal("http://example/customer?view=True", request.RequestUri.OriginalString);
         }
 
 
@@ -150,17 +145,14 @@ namespace LinkTests
         {
             var link = new Link()
             {
-                Target = new Uri("http://example/customer?view=False&foo=bar")
+                Target = new Uri("http://example/customer?view=False&foo=bar"),
+                AddNonTemplatedParametersToQueryString = true
             };
+            var parameters = link.GetQueryStringParameters();
+            parameters["view"] = true;
 
-            link.CreateParametersFromQueryString();
-
-            link.SetParameter("view", true);
-
-            link.AddParametersAsTemplate(true);
-
-            var resolvedTarget = link.GetResolvedTarget().OriginalString;
-            Assert.Equal("http://example/customer?view=True&foo=bar", resolvedTarget);
+            var request = link.BuildRequestMessage(parameters);
+            Assert.Equal("http://example/customer?view=True&foo=bar", request.RequestUri.OriginalString);
         }
     }
 }

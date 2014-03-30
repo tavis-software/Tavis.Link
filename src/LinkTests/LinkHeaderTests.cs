@@ -45,6 +45,7 @@ namespace LinkTests
         public void ParseLinkHeaders()
         {
             var linkRegistry = new LinkFactory();
+            
             var response = new HttpResponseMessage();
             response.RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://example.org/") };
             response.Headers.AddLinkHeader(new AboutLink() { Target = new Uri("http://example.org/about") });

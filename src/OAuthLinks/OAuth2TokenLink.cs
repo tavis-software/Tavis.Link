@@ -11,6 +11,10 @@ namespace Tavis.OAuth
         private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>();
 
 
+        public OAuth2TokenLink()
+        {
+            
+        }
         public Uri RedirectUri
         {
             get { return new Uri(_BodyParameters["redirect_uri"]);  }
@@ -18,13 +22,9 @@ namespace Tavis.OAuth
             }
         }
 
-        public override HttpRequestMessage CreateRequest()
+        public new HttpRequestMessage BuildRequestMessage()
         {
-            
-            var request = base.CreateRequest();
-            request.Method = HttpMethod.Post;
-            request.Content =new FormUrlEncodedContent(_BodyParameters);
-            return request;
+            return BuildRequestMessage(null, HttpMethod.Post, new FormUrlEncodedContent(_BodyParameters)); 
         }
 
         public string ClientId

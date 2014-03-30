@@ -86,6 +86,7 @@
     <Compile Include="ActionResponseHandler.cs" />
     <Compile Include="BingMapLink.cs" />
     <Compile Include="DerivedLinkTests.cs" />
+    <Compile Include="ExampleTests.cs" />
     <Compile Include="GuidServiceLinkTest.cs" />
     <Compile Include="HintTests.cs" />
     <Compile Include="LinkHeaderTests.cs" />

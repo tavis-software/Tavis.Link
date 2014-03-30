@@ -22,24 +22,30 @@ namespace LinkTests
         {
             var link = new Link() { Target = new Uri("Http://localhost") };
 
-            var request = link.CreateRequest();
+            var request = link.BuildRequestMessage();
 
-            Assert.Equal(request.Method, link.Method);
+            Assert.Equal(HttpMethod.Get,request.Method);
         }
 
 
         [Fact]
         public void SettingAnAcceptHeaderShouldBePassedToTheRequest()
         {
-            var link = new Link { Target = new Uri("Http://localhost") };
+            var link = new Link
+            {
+                Target = new Uri("Http://localhost"),
+                
+            };
+            link.AddRequestBuilder(new ActionRequestBuilder((r) =>
+            {
+                r.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.hal"));
+                r.Headers.UserAgent.Add(new ProductInfoHeaderValue("foo", "1.1"));
+            }));
 
 
-            var acceptHeader = new MediaTypeWithQualityHeaderValue("application/vnd.hal");
-            link.RequestHeaders.Accept.Add(acceptHeader);
+            var request = link.BuildRequestMessage();
 
-            var request = link.CreateRequest();
-
-            Assert.True(request.Headers.Accept.Where(h => h.MediaType == "application/vnd.hal").Any());
+            Assert.True(request.Headers.Accept.Any(h => h.MediaType == "application/vnd.hal"));
         }
 
 
@@ -47,9 +53,8 @@ namespace LinkTests
         public void SettingContentShouldBePassedToTheRequest()
         {
             var link = new Link { Target = new Uri("Http://localhost") };
-            link.Content = new StringContent("Hello World");
-            link.Method = HttpMethod.Post;
-            var request = link.CreateRequest();
+
+            var request = link.BuildRequestMessage(null, HttpMethod.Post, new StringContent("Hello World"));
 
             Assert.Equal(request.Content.ReadAsStringAsync().Result, "Hello World");
         }
@@ -61,7 +66,7 @@ namespace LinkTests
             var link = new Link { Target = new Uri("Http://localhost") };
             var client = new HttpClient(new FakeMessageHandler());
 
-            var response = client.SendAsync(link.CreateRequest()).Result;
+            var response = client.SendAsync(link.BuildRequestMessage()).Result;
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -74,7 +79,7 @@ namespace LinkTests
             var link = new Link { Target = new Uri("Http://localhost") }; 
             var client = new HttpClient(new FakeMessageHandler());
 
-            var response = client.SendAsync(link.CreateRequest()).Result;
+            var response = client.SendAsync(link.BuildRequestMessage()).Result;
 
             Assert.Equal("http://localhost/", response.RequestMessage.RequestUri.AbsoluteUri);
         }
@@ -100,11 +105,10 @@ namespace LinkTests
         public void AddParameterToLink()
         {
             var link = new Link(){ Target = new Uri("http://localhost/{?foo}")};
-        link.SetParameter("foo","bar");
-            
+        
             var client = new HttpClient(new FakeMessageHandler());
 
-            var response = client.SendAsync(link.CreateRequest()).Result;
+            var response = client.SendAsync(link.BuildRequestMessage(new Dictionary<string,object> {{"foo","bar"}})).Result;
 
             Assert.Equal("http://localhost/?foo=bar", response.RequestMessage.RequestUri.AbsoluteUri);
         }
@@ -114,13 +118,16 @@ namespace LinkTests
         public void AddMultipleParametersToLink()
         {
             var link = new Link() { Target = new Uri("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
-            link.SetParameter("foo", "bar");
-            link.SetParameter("baz", "99");
-            link.SetParameter("dataset", "bob");
 
-            var uri = link.GetResolvedTarget();
+
+            var request = link.BuildRequestMessage(new Dictionary<string, object>
+            {
+                {"foo", "bar"},
+                {"baz", "99"},
+                {"dataset", "bob"}
+            });
             
-            Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", request.RequestUri.AbsoluteUri);
         }
 
 
@@ -154,26 +161,27 @@ namespace LinkTests
 
 
 
-        [Fact]
-        public void AddParameterToLinkMultipleTimes()
-        {
-            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
-            link.SetParameter("foo", "bar");
-            link.SetParameter("foo", "blah");
+        //[Fact]
+        //public void AddParameterToLinkMultipleTimes()
+        //{
+        //    var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            
 
-            var request = link.CreateRequest();
+        //    var request = link.CreateRequest(new Dictionary<string, object>
+        //    {
+        //        {"foo", "bar"},
+        //        {"foo", "blah"}
+        //    });
 
-            Assert.Equal("http://localhost/?foo=blah", request.RequestUri.AbsoluteUri);
-        }
+        //    Assert.Equal("http://localhost/?foo=blah", request.RequestUri.AbsoluteUri);
+        //}
 
         [Fact]
         public void UnsetParameterInLink()
         {
             var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
-            link.SetParameter("foo", "bar");
-            link.UnsetParameter("foo");
-
-            var request = link.CreateRequest();
+            
+            var request = link.BuildRequestMessage(new Dictionary<string,object>());
 
             Assert.Equal("http://localhost/", request.RequestUri.AbsoluteUri);
         }
@@ -184,9 +192,8 @@ namespace LinkTests
         public void SetListParameterInLink()
         {
             var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
-            link.SetParameter("foo", new List<string>(){ "bar","baz","bler"});
 
-            var request = link.CreateRequest();
+            var request = link.BuildRequestMessage(new Dictionary<string, object> { { "foo", new List<string>() { "bar", "baz", "bler" } } });
 
             Assert.Equal("http://localhost/?foo=bar,baz,bler", request.RequestUri.AbsoluteUri);
         }
@@ -245,10 +252,13 @@ namespace LinkTests
             var link = new Link();
             link.Target = new Uri("http://www.myBase.com/get{?a,b}");
 
-            link.SetParameter("a","1");
-            link.SetParameter("b", "c");
+            var parameters = new Dictionary<string, object>
+            {
+                {"a","1"},
+                {"b", "c"}
+            };
 
-            var request = link.CreateRequest();
+            var request = link.BuildRequestMessage(parameters);
             Assert.Equal("http://www.myBase.com/get?a=1&b=c", request.RequestUri.OriginalString);
             
             

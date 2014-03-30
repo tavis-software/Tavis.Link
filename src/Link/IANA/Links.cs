@@ -149,11 +149,15 @@ namespace Tavis.IANA
 
         public HubLink()
         {
-            Method = HttpMethod.Post;
             Mode = SubscribeMode.subscribe;
+            AddRequestBuilder(new ActionRequestBuilder((r) =>
+            {
+                r.Method = HttpMethod.Post;
+            }));
+            
         }
 
-        public override HttpRequestMessage CreateRequest()
+        public  HttpRequestMessage BuildRequestMessage()
         {
             var bodyParameters = new Dictionary<string, string>()
             {
@@ -165,9 +169,11 @@ namespace Tavis.IANA
             if (Lease.TotalSeconds > 0) bodyParameters.Add("hub.lease_seconds",Lease.TotalSeconds.ToString());
             if (!String.IsNullOrEmpty(Secret)) bodyParameters.Add("hub.secret", Secret);
 
-            var request = base.CreateRequest();
+            var content = new FormUrlEncodedContent(bodyParameters);
 
-            request.Content = new FormUrlEncodedContent(bodyParameters);
+            var request = BuildRequestMessage(null,HttpMethod.Post, content);
+
+            
             return request;
         }
 

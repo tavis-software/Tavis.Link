@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Tavis.Search
@@ -18,13 +19,13 @@ namespace Tavis.Search
         {
             var openSearchDescription = await LoadOpenSearchDescription();
             var link = openSearchDescription.Url;
-            link.SetParameter("searchTerms", param);
-            return await _httpClient.SendAsync(link.CreateRequest());
+            
+            return await _httpClient.SendAsync(link.BuildRequestMessage(new Dictionary<string, object> { { "searchTerms", param } }));
         }
 
         private async Task<OpenSearchDescription> LoadOpenSearchDescription()
         {
-            var response = await _httpClient.SendAsync(_link.CreateRequest());
+            var response = await _httpClient.SendAsync(_link.BuildRequestMessage());
             var desc = await response.Content.ReadAsStreamAsync();
             return new OpenSearchDescription(response.Content.Headers.ContentType, desc);
         }
