@@ -73,6 +73,13 @@ namespace Tavis
             HttpRequestBuilder = requestBuilder;
         }
 
+        public void DefineParameter(string name, Uri identifier)
+        {
+            _ParameterDefinitions.Add(new LinkParameterDefinition() {Name = name, Identifier = identifier});
+        }
+        private List<LinkParameterDefinition> _ParameterDefinitions  = new List<LinkParameterDefinition>(); 
+
+
         /// <summary>
         /// Entry point for triggering the execution of the assigned HttpResponseHandler if one exists
         /// </summary>

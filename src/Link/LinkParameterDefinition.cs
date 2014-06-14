@@ -3,12 +3,12 @@
 namespace Tavis
 {
     /// <summary>
-    /// Parameter used to fill in URI templates
+    /// Definition of parameter used to fill URI templates
     /// </summary>
-    public class LinkParameter
+    public class LinkParameterDefinition
     {
         public string Name { get; set; }
-        public object Value { get; set; }
         public Uri Identifier { get; set; }
+        //todo: Should we add datatype here?
     }
 }
