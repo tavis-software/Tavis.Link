@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Link", "src\Link\Link.csproj", "{4D56A07D-3985-4D1C-86E3-094F4961CC25}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkTests", "src\LinkTests\LinkTests.csproj", "{674376A9-FD66-466F-9CCE-418D8341CB1A}"
-EndProject
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{86B0143E-9FD8-4A88-A1A9-0CAA21A21F87}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -17,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		readme.md = readme.md
 		ReleaseNotes.md = ReleaseNotes.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Link", "src\Link\Link.csproj", "{4D56A07D-3985-4D1C-86E3-094F4961CC25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkTests", "src\LinkTests\LinkTests.csproj", "{674376A9-FD66-466F-9CCE-418D8341CB1A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OAuthLinks", "Src\OAuthLinks\OAuthLinks.csproj", "{7B105573-D9CA-4869-BDA0-412573E19D86}"
 EndProject
