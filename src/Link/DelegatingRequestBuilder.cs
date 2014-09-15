@@ -6,13 +6,48 @@ namespace Tavis
     /// <summary>
     /// 
     /// </summary>
-    public class DelegatingRequestBuilder : IHttpRequestBuilder
+    public abstract class DelegatingRequestBuilder : IHttpRequestBuilder
     {
-        public IHttpRequestBuilder InnerBuilder { get; set; }
+        public IHttpRequestBuilder NextBuilder { get; set; }
 
-        public virtual HttpRequestMessage Build(Link link, Dictionary<string, object> uriParameters, HttpMethod method, HttpContent content)
+        public HttpRequestMessage Build(HttpRequestMessage request)
         {
-            return InnerBuilder.Build(link, uriParameters, method, content);
+            request = ApplyChanges(request);
+
+            if (NextBuilder != null)
+            { 
+                request = NextBuilder.Build(request);
+            }
+            return request;
+            
         }
+
+        protected abstract HttpRequestMessage ApplyChanges(HttpRequestMessage request);
+    }
+
+    public abstract class BaseChainedRequestBuilder : IHttpRequestBuilder
+    {
+        private readonly IHttpRequestBuilder _NextActionResult;
+
+        protected BaseChainedRequestBuilder(IHttpRequestBuilder actionResult)
+        {
+            _NextActionResult = actionResult;
+        }
+
+        public HttpRequestMessage Build(HttpRequestMessage request)
+        {
+            if (_NextActionResult == null)
+            {
+                return ApplyChanges(request);
+            }
+            else
+            {
+                request = _NextActionResult.Build(request);
+                return ApplyChanges(request);
+            }
+        }
+
+        public abstract HttpRequestMessage ApplyChanges(HttpRequestMessage request);
+
     }
 }

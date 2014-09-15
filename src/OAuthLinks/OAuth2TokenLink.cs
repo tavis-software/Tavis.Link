@@ -8,59 +8,68 @@ namespace Tavis.OAuth
     [LinkRelationType("oauth2-token")]
     public class OAuth2TokenLink : Link
     {
-        private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>();
+        public class RequestBody
+        {
+            private readonly Dictionary<string, string> _BodyParameters = new Dictionary<string, string>();
 
+            public Uri RedirectUri
+            {
+                get { return new Uri(_BodyParameters["redirect_uri"]); }
+                set
+                {
+                    _BodyParameters["redirect_uri"] = value.OriginalString;
+                }
+            }
+
+
+
+            public string ClientId
+            {
+                get { return _BodyParameters["client_id"]; }
+                set { _BodyParameters["client_id"] = value; }
+            }
+            public string ClientSecret
+            {
+                get { return _BodyParameters["client_secret"]; }
+                set { _BodyParameters["client_secret"] = value; }
+            }
+
+            public string GrantType
+            {
+                get { return _BodyParameters["grant_type"]; }
+                set { _BodyParameters["grant_type"] = value; }
+            }
+
+            public string AuthorizationCode
+            {
+                get { return _BodyParameters["code"]; }
+                set { _BodyParameters["code"] = value; }
+            }
+
+            public string Username
+            {
+                get { return _BodyParameters["username"]; }
+                set { _BodyParameters["username"] = value; }
+            }
+
+            public string Password
+            {
+                get { return _BodyParameters["password"]; }
+                set { _BodyParameters["password"] = value; }
+            }
+
+            public HttpContent AsHttpContent()
+            {
+                return new FormUrlEncodedContent(_BodyParameters);
+            }
+        }
+        
 
         public OAuth2TokenLink()
         {
-            
-        }
-        public Uri RedirectUri
-        {
-            get { return new Uri(_BodyParameters["redirect_uri"]);  }
-            set { _BodyParameters["redirect_uri"] = value.OriginalString;
-            }
+            Method = HttpMethod.Post;
         }
 
-        public new HttpRequestMessage BuildRequestMessage()
-        {
-            return BuildRequestMessage(null, HttpMethod.Post, new FormUrlEncodedContent(_BodyParameters)); 
-        }
-
-        public string ClientId
-        {
-            get { return _BodyParameters["client_id"]; }
-            set { _BodyParameters["client_id"] = value; }
-        }
-        public string ClientSecret
-        {
-            get { return _BodyParameters["client_secret"]; }
-            set { _BodyParameters["client_secret"] = value; }
-        }
-
-        public string GrantType
-        {
-            get { return _BodyParameters["grant_type"]; }
-            set { _BodyParameters["grant_type"] = value; }
-        }
-        
-        public string AuthorizationCode
-        {
-            get { return _BodyParameters["code"]; }
-            set { _BodyParameters["code"] = value; }
-        }
-
-        public string Username
-        {
-            get { return _BodyParameters["username"]; }
-            set { _BodyParameters["username"] = value; }
-        }
-
-        public string Password
-        {
-            get { return _BodyParameters["password"]; }
-            set { _BodyParameters["password"] = value; }
-        }
         
         public static Oauth2Token ParseTokenBody(string tokenBody)
         {

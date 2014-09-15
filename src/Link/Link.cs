@@ -22,7 +22,20 @@ namespace Tavis
     /// </summary>
     public class Link : LinkRfc
     {
-        public bool AddNonTemplatedParametersToQueryString { get; set; }
+        // Client Defined Attributes
+        private Dictionary<string, object> _linkParameters;
+        private HttpMethod _method;
+        private HttpContent _content;
+
+        // Server Defined Attrbutes
+        private List<LinkParameterDefinition> _ParameterDefinitions = new List<LinkParameterDefinition>();
+        private Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
+
+        protected HttpMethod Method
+        {
+            get { return _method; }
+            set { _method = value; }
+        }
 
         /// <summary>
         /// A handler with knowledge of how to process the response to following a link.  
@@ -45,31 +58,70 @@ namespace Tavis
         /// </remarks>
         public Link()
         {
+            _method = HttpMethod.Get;
             Relation = LinkHelper.GetLinkRelationTypeName(GetType());
             HttpRequestBuilder = new DefaultRequestBuilder();
+            
+        }
+
+
+        public Link ApplyParameters(Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString = false)
+        {
+            var link = CloneLink();
+            link.Target = Link.GetResolvedTarget(Target, linkParameters, addNonTemplatedParametersToQueryString);
+            return link;
+        }
+        public Link ChangeMethod(HttpMethod newMethod)
+        {
+            var link = CloneLink();
+            link._method = newMethod;
+            return link;
+        }
+
+        public Link AddPayload(HttpContent content)
+        {
+            var link = CloneLink();
+            link._content = content;
+            return link;
+        }
+
+        // 
+        private Link CloneLink() 
+        {
+            var type = this.GetType();
+            var newLink = (Link)Activator.CreateInstance(type);
+
+            newLink.HttpRequestBuilder = HttpRequestBuilder;  // Can these be copied by reference, or does it need to be by-value
+            newLink.HttpResponseHandler = HttpResponseHandler;
+            newLink._ParameterDefinitions = _ParameterDefinitions;
+            newLink._Hints = _Hints;
+            newLink._method = _method;
+            newLink._content = _content;
+
+            return newLink;
         }
 
         /// <summary>
         /// Create an HTTPRequestMessage based on the information stored in the link.
         /// </summary>
         /// <returns></returns>
-        public HttpRequestMessage BuildRequestMessage(HttpMethod method = null , HttpContent content = null)
+        public HttpRequestMessage BuildRequestMessage()
         {
-            if (method == null) method = HttpMethod.Get;
-            return BuildRequestMessage(null, method, content);
-        }
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = _method,
+                RequestUri = Target,
+                Content = _content
+            };
 
-        public HttpRequestMessage BuildRequestMessage(Dictionary<string, object> linkParameters, HttpMethod method = null, HttpContent content = null)
-        {
-            if (linkParameters == null) linkParameters = new Dictionary<string, object>();
-            if (method == null) method = HttpMethod.Get;
+            var request = ApplyHints(requestMessage, GetHints());
 
-            return HttpRequestBuilder.Build(this, linkParameters, method, content);
+            return HttpRequestBuilder.Build(request);
         }
 
         public void AddRequestBuilder(DelegatingRequestBuilder requestBuilder)
         {
-            requestBuilder.InnerBuilder = HttpRequestBuilder;
+            requestBuilder.NextBuilder = HttpRequestBuilder;
             HttpRequestBuilder = requestBuilder;
         }
 
@@ -77,8 +129,7 @@ namespace Tavis
         {
             _ParameterDefinitions.Add(new LinkParameterDefinition() {Name = name, Identifier = identifier});
         }
-        private List<LinkParameterDefinition> _ParameterDefinitions  = new List<LinkParameterDefinition>(); 
-
+        
 
         /// <summary>
         /// Entry point for triggering the execution of the assigned HttpResponseHandler if one exists
@@ -233,7 +284,6 @@ namespace Tavis
             }
         }
 
-        private readonly Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
-
+  
     }
 }

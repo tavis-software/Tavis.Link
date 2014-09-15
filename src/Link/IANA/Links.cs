@@ -150,33 +150,27 @@ namespace Tavis.IANA
         public HubLink()
         {
             Mode = SubscribeMode.subscribe;
-            AddRequestBuilder(new ActionRequestBuilder((r) =>
+            AddRequestBuilder(new InlineRequestBuilder((r) =>
             {
                 r.Method = HttpMethod.Post;
+
+                var bodyParameters = new Dictionary<string, string>()
+                {
+                    {"hub.callback", Callback.OriginalString},
+                    {"hub.mode", Mode.ToString()},
+                    {"hub.topic", Topic.OriginalString},
+                };
+
+                if (Lease.TotalSeconds > 0) bodyParameters.Add("hub.lease_seconds", Lease.TotalSeconds.ToString());
+                if (!String.IsNullOrEmpty(Secret)) bodyParameters.Add("hub.secret", Secret);
+
+                r.Content = new FormUrlEncodedContent(bodyParameters);
+                return r;
             }));
             
         }
 
-        public  HttpRequestMessage BuildRequestMessage()
-        {
-            var bodyParameters = new Dictionary<string, string>()
-            {
-                {"hub.callback",Callback.OriginalString},
-                {"hub.mode", Mode.ToString()},
-                {"hub.topic", Topic.OriginalString},
-            };
-            
-            if (Lease.TotalSeconds > 0) bodyParameters.Add("hub.lease_seconds",Lease.TotalSeconds.ToString());
-            if (!String.IsNullOrEmpty(Secret)) bodyParameters.Add("hub.secret", Secret);
-
-            var content = new FormUrlEncodedContent(bodyParameters);
-
-            var request = BuildRequestMessage(null,HttpMethod.Post, content);
-
-            
-            return request;
-        }
-
+  
         public static bool IsSubscribed(HttpResponseMessage response)
         {
             return response.StatusCode == HttpStatusCode.Accepted;

@@ -140,7 +140,7 @@ namespace Tavis
             IHttpRequestBuilder builderList = new DefaultRequestBuilder();
             foreach (var requestBuilder in builders.Reverse())
             {
-                requestBuilder.InnerBuilder = builderList;
+                requestBuilder.NextBuilder = builderList;
                 builderList = (IHttpRequestBuilder) requestBuilder;
             }
             reg.RequestBuilder = builderList;

@@ -84,7 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionRequestBuilder.cs" />
+    <Compile Include="InlineRequestBuilder.cs" />
     <Compile Include="ActionResponseHandler.cs" />
     <Compile Include="DefaultRequestBuilder.cs" />
     <Compile Include="DelegatingRequestBuilder.cs" />

@@ -19,7 +19,11 @@ namespace LinkTests
         public void Add_user_Agent_header()
         {
             var linkFactory = new LinkFactory();
-            linkFactory.SetRequestBuilder<AboutLink>(new ActionRequestBuilder(r => r.Headers.UserAgent.Add(new ProductInfoHeaderValue("MyApp", "1.0"))));
+            linkFactory.SetRequestBuilder<AboutLink>(new InlineRequestBuilder(r =>
+            {
+                r.Headers.UserAgent.Add(new ProductInfoHeaderValue("MyApp", "1.0"));
+                return r;
+            }));
 
             var aboutlink = linkFactory.CreateLink<AboutLink>();
             aboutlink.Target = new Uri("http://example.org/about");
@@ -34,8 +38,10 @@ namespace LinkTests
         public void Add_auth_header_aboutlink_request()
         {
             var linkFactory = new LinkFactory();
-            linkFactory.SetRequestBuilder<AboutLink>(new ActionRequestBuilder(
-                r => { r.Headers.Authorization = new AuthenticationHeaderValue("foo", "bar"); }));
+            linkFactory.SetRequestBuilder<AboutLink>(new InlineRequestBuilder(
+                r => { r.Headers.Authorization = new AuthenticationHeaderValue("foo", "bar");
+                         return r;
+                }));
 
             var aboutlink = linkFactory.CreateLink<AboutLink>();
             aboutlink.Target = new Uri("http://example.org/about");
@@ -53,7 +59,11 @@ namespace LinkTests
             var builders = new List<DelegatingRequestBuilder>()
             {
                 new AcceptHeaderRequestBuilder(new[] {new MediaTypeWithQualityHeaderValue("text/css")}),
-                new ActionRequestBuilder(r => r.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip")))
+                new InlineRequestBuilder(r =>
+                {
+                    r.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+                    return r;
+                })
             };
 
             linkFactory.SetRequestBuilder<StylesheetLink>(builders);
@@ -73,8 +83,9 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer/{id}"));
 
+            var link = aboutlink.ApplyParameters(new Dictionary<string, object> { { "id", 45 } });
 
-            var request = aboutlink.BuildRequestMessage(new Dictionary<string,object> {{"id",45}});
+            var request = link.BuildRequestMessage();
 
             Assert.Equal("http://example.org/customer/45", request.RequestUri.OriginalString);
         }
@@ -87,7 +98,9 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer{?id}"));
 
-            var request = aboutlink.BuildRequestMessage(new Dictionary<string, object> { { "id", 45 } });
+            var link = aboutlink.ApplyParameters(new Dictionary<string, object> {{"id", 45}});
+
+            var request = link.BuildRequestMessage();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -99,9 +112,10 @@ namespace LinkTests
         {
             var linkFactory = new LinkFactory();
             var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer"));
-            aboutlink.AddNonTemplatedParametersToQueryString = true;
+            
 
-            var request = aboutlink.BuildRequestMessage(new Dictionary<string, object> { { "id", 45 } });
+            var link = aboutlink.ApplyParameters(new Dictionary<string, object> {{"id", 45}},true);
+            var request = link.BuildRequestMessage();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -112,11 +126,13 @@ namespace LinkTests
         {
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?id=23"));
-            relatedLink.AddNonTemplatedParametersToQueryString = true;
+            
 
             var parameters = relatedLink.GetQueryStringParameters();
             parameters["id"] = 45;
-            var request = relatedLink.BuildRequestMessage(parameters);
+
+            var link = relatedLink.ApplyParameters(parameters,true);
+            var request = link.BuildRequestMessage();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -127,12 +143,13 @@ namespace LinkTests
         {
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
-            relatedLink.AddNonTemplatedParametersToQueryString = true;
+            
 
             var parameters = relatedLink.GetQueryStringParameters();
             parameters.Remove("format");
 
-            var request = relatedLink.BuildRequestMessage(parameters);
+            var link = relatedLink.ApplyParameters(parameters,true);
+            var request = link.BuildRequestMessage();
 
             Assert.Equal("http://example.org/customer?id=23", request.RequestUri.OriginalString);
         }
@@ -143,9 +160,9 @@ namespace LinkTests
         {
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
-            
-            
-            var request = relatedLink.BuildRequestMessage(HttpMethod.Head);
+
+            var headLink = relatedLink.ChangeMethod(HttpMethod.Head);
+            var request = headLink.BuildRequestMessage();
 
             Assert.Equal(HttpMethod.Head, request.Method);
         }
@@ -157,8 +174,9 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
 
-
-            var request = relatedLink.BuildRequestMessage(HttpMethod.Post, new StringContent(""));
+            var link = relatedLink.ChangeMethod(HttpMethod.Post);
+            link = link.AddPayload(new StringContent(""));
+            var request = link.BuildRequestMessage();
 
             Assert.Equal(HttpMethod.Post, request.Method);
         }

@@ -8,10 +8,7 @@ namespace Tavis.OAuth
     public class OAuth2AuthorizeLink : Link
     {
 
-        public OAuth2AuthorizeLink()
-        {
-            AddNonTemplatedParametersToQueryString = true;
-        }
+    
 
         public HttpRequestMessage CreateRequest(string clientId, string responseType, Uri redirectUri, string[] scope, string state)
         {
@@ -23,9 +20,9 @@ namespace Tavis.OAuth
                 {"redirect_uri", scope},
                 {"state", state}
             };
-
+            var link = this.ApplyParameters(values,true);
             //var target = new Uri(Target, "{?client_id,scope,response_type,redirect_uri,state}");
-            return base.BuildRequestMessage(values);
+            return link.BuildRequestMessage();
 
         }
 

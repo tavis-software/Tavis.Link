@@ -19,8 +19,9 @@ namespace Tavis.Search
         {
             var openSearchDescription = await LoadOpenSearchDescription();
             var link = openSearchDescription.Url;
-            
-            return await _httpClient.SendAsync(link.BuildRequestMessage(new Dictionary<string, object> { { "searchTerms", param } }));
+            link = link.ApplyParameters(new Dictionary<string, object> {{"searchTerms", param}});
+
+            return await _httpClient.SendAsync(link.BuildRequestMessage());
         }
 
         private async Task<OpenSearchDescription> LoadOpenSearchDescription()

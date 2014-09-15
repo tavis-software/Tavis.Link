@@ -91,8 +91,9 @@ namespace LinkTests
                 {"tolanguage", toLanguage},
                 {"fromphrase", fromPhrase}
             };
+            var link = ApplyParameters(parameters);
 
-            return base.BuildRequestMessage(parameters);
+            return link.BuildRequestMessage();
         }
     }
 
@@ -114,7 +115,8 @@ namespace LinkTests
                 {"long", longitude},
                 {"level", level}
             };
-            return base.BuildRequestMessage(parameters);
+            var link = this.ApplyParameters(parameters);
+            return link.BuildRequestMessage();
         }
     }
 

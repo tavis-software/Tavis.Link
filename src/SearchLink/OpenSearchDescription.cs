@@ -38,7 +38,9 @@ namespace Tavis.Search
                     Target = new Uri(url.Attribute("template").Value),
                     Type = new MediaTypeWithQualityHeaderValue(url.Attribute("type").Value)
                 };
-            Url.AddRequestBuilder(new ActionRequestBuilder((r) => r.Method = new HttpMethod(url.Attribute("method").Value.ToUpper()))); 
+            Url.AddRequestBuilder(new InlineRequestBuilder((r) => {r.Method = new HttpMethod(url.Attribute("method").Value.ToUpper());
+                                                                      return r;
+            })); 
 
         }
     }

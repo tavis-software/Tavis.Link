@@ -14,17 +14,14 @@ namespace LinkTests
             _AcceptHeader = acceptHeaders;
         }
 
-        public override HttpRequestMessage Build(Link link, Dictionary<string, object> uriParameters, HttpMethod method, HttpContent content)
+        protected override HttpRequestMessage ApplyChanges(HttpRequestMessage request)
         {
-            var request = base.Build(link, uriParameters, method, content);
             request.Headers.Accept.Clear();
             foreach (var headerValue in _AcceptHeader)
             {
-                request.Headers.Accept.Add(headerValue);    
+                request.Headers.Accept.Add(headerValue);
             }
             return request;
         }
-
-
     }
 }
