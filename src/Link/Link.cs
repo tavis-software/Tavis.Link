@@ -64,6 +64,10 @@ namespace Tavis
             
         }
 
+        public IEnumerable<LinkParameterDefinition> ParameterDefinitions
+        {
+            get { return _ParameterDefinitions; }
+        } 
 
         public Link ApplyParameters(Dictionary<string, object> linkParameters, bool addNonTemplatedParametersToQueryString = false)
         {
@@ -119,6 +123,21 @@ namespace Tavis
             return HttpRequestBuilder.Build(request);
         }
 
+       /// <summary>
+       /// Add a method that will be used to contribute to the construction of the HttpRequestMessage
+       /// </summary>
+       /// <param name="requestBuilderFunc"></param>
+       /// <remarks>RequestBuilders are called in the order they are assigned after the Link class has performed its basic setup</remarks>
+        public void AddRequestBuilder(Func<HttpRequestMessage,HttpRequestMessage> requestBuilderFunc )
+        {
+            HttpRequestBuilder = new InlineRequestBuilder(requestBuilderFunc) { NextBuilder = HttpRequestBuilder }; ;
+        }
+
+        /// <summary>
+        /// Add a RequestBuilder instance that will be used to contribute to the construction of the HttpRequestMessage
+        /// </summary>
+        /// <param name="requestBuilderFunc"></param>
+        /// <remarks>RequestBuilders are called in the order they are assigned after the Link class has performed its basic setup</remarks>
         public void AddRequestBuilder(DelegatingRequestBuilder requestBuilder)
         {
             requestBuilder.NextBuilder = HttpRequestBuilder;
