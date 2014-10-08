@@ -120,4 +120,30 @@ namespace LinkTests
         }
     }
 
+    public class BingMapLink2 : Link
+    {
+        private Dictionary<string, object> _Parameters; 
+        public BingMapLink2()
+        {
+            Target = new Uri("http://www.bing.com/maps/?v=2&cp={lat}~{long}&lvl={level}");
+            this.HttpRequestBuilder = new InlineRequestBuilder((r) =>
+            {
+                var link = this.ApplyParameters(_Parameters);
+                return link.BuildRequestMessage();
+            });
+        }
+
+        
+        public void SetLocation(double latitude, double longitude, int level = 10)
+        {
+            _Parameters = new Dictionary<string, object>
+            {
+                {"lat", latitude },
+                {"long", longitude},
+                {"level", level}
+            };
+           
+        }
+    }
+
 }

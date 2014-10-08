@@ -2,19 +2,19 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Tavis.Link</id>
-    <version>2.0.0-beta</version>
+    <version>2.0.3-beta</version>
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Added new property to handle adding non-templated query string parameters</releaseNotes>
+    <releaseNotes>Added support for WinPhone 8.1</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-      	  <dependency id="Tavis.UriTemplates" version="0.4.0" />
-	  <dependency id="Microsoft.Net.Http" version="2.2.18" />
-	  <dependency id="Newtonsoft.Json" version="5.0.8" />
+      	  <dependency id="Tavis.UriTemplates" version="0.5.0-beta1" />
+	  <dependency id="Microsoft.Net.Http" version="2.2.22" />
+	  <dependency id="Newtonsoft.Json" version="6.0.5" />
 	</dependencies>
   </metadata>
   <files>
-    <file src="..\src\Link\bin\Release\Tavis.Link.dll" target="lib\portable-win+net40+sl40+wp71" />
+    <file src="..\src\Link\bin\Release\Tavis.Link.dll" target="lib\portable-net45+sl5+wp8+win8+wpa81+MonoTouch1+MonoAndroid1\" />
   </files>
 </package>
