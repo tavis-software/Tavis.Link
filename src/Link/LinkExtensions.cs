@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
+
 using System.Text;
 
 namespace Tavis
@@ -83,7 +81,7 @@ namespace Tavis
             }
             if (link.Type != null)
             {
-                headerValue.Append(";").AppendKey("type").AppendQuotedString(link.Type.MediaType);
+                headerValue.Append(";").AppendKey("type").AppendQuotedString(link.Type);
             }
 
             foreach (var linkExtension in link.LinkExtensions)

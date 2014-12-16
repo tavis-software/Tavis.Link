@@ -10,7 +10,7 @@ namespace Tavis
     /// <summary>
     /// 
     /// </summary>
-    public class LinkFactory
+    public class LinkFactory 
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
 

@@ -17,7 +17,7 @@ namespace Samples
                 {
                     Target = new Uri("http://www.stackoverflow.com/opensearch.xml"),
                     //Target = new Uri("https://www.w3.org/Bugs/Public/search_plugin.cgi"),
-                    Type = new MediaTypeWithQualityHeaderValue("application/opensearchdescription+xml")
+                    Type = "application/opensearchdescription+xml"
                 };
             var searchMission = new SearchMission(httpClient, searchLink);
             var response = searchMission.GoAsync("evolvable").Result;

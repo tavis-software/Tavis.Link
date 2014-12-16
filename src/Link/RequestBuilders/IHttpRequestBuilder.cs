@@ -8,6 +8,6 @@ namespace Tavis
     /// </summary>
     public interface IHttpRequestBuilder
     {
-        HttpRequestMessage Build(HttpRequestMessage request);
+        HttpRequestMessage Build(Link link, HttpRequestMessage request);
     }
 }

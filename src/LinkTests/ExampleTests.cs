@@ -7,6 +7,7 @@ using System.Runtime;
 using System.Text;
 using Tavis;
 using Tavis.IANA;
+using Tavis.UriTemplates;
 using Xunit;
 
 namespace LinkTests
@@ -15,9 +16,12 @@ namespace LinkTests
     {
 
         // Add a user agent header to every request
+        // This is a bogus example, it should be done via HttpClient MessageHandler
         [Fact]
         public void Add_user_Agent_header()
         {
+            
+
             var linkFactory = new LinkFactory();
             linkFactory.SetRequestBuilder<AboutLink>(new InlineRequestBuilder(r =>
             {
@@ -28,13 +32,14 @@ namespace LinkTests
             var aboutlink = linkFactory.CreateLink<AboutLink>();
             aboutlink.Target = new Uri("http://example.org/about");
 
-            var request = aboutlink.BuildRequestMessage();
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("MyApp/1.0", request.Headers.UserAgent.ToString());
         }
 
 
         [Fact]
+        // This is bogus too.  Also should be done by HttpClient Message handler
         public void Add_auth_header_aboutlink_request()
         {
             var linkFactory = new LinkFactory();
@@ -46,7 +51,7 @@ namespace LinkTests
             var aboutlink = linkFactory.CreateLink<AboutLink>();
             aboutlink.Target = new Uri("http://example.org/about");
 
-            var request = aboutlink.BuildRequestMessage();
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("foo bar", request.Headers.Authorization.ToString());
         }
@@ -71,7 +76,7 @@ namespace LinkTests
             var aboutlink = linkFactory.CreateLink<StylesheetLink>();
             aboutlink.Target = new Uri("http://example.org/about");
 
-            var request = aboutlink.BuildRequestMessage();
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("text/css", request.Headers.Accept.ToString());
             Assert.Equal("gzip", request.Headers.AcceptEncoding.ToString());
@@ -81,11 +86,11 @@ namespace LinkTests
         public void Set_path_parameters()
         {
             var linkFactory = new LinkFactory();
-            var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer/{id}"));
+            var aboutlink = linkFactory.CreateLink<RelatedLink>();
+            aboutlink.Template = new UriTemplate("http://example.org/customer/{id}");
+            aboutlink.Template.AddParameter("id", 45 );
 
-            var link = aboutlink.ApplyParameters(new Dictionary<string, object> { { "id", 45 } });
-
-            var request = link.BuildRequestMessage();
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("http://example.org/customer/45", request.RequestUri.OriginalString);
         }
@@ -98,9 +103,10 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer{?id}"));
 
-            var link = aboutlink.ApplyParameters(new Dictionary<string, object> {{"id", 45}});
 
-            var request = link.BuildRequestMessage();
+            aboutlink.Template.AddParameter("id", 45);
+
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -112,10 +118,10 @@ namespace LinkTests
         {
             var linkFactory = new LinkFactory();
             var aboutlink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer"));
-            
 
-            var link = aboutlink.ApplyParameters(new Dictionary<string, object> {{"id", 45}},true);
-            var request = link.BuildRequestMessage();
+            aboutlink.Template = new UriTemplate(aboutlink.Target.AbsoluteUri + "{?id}");
+            aboutlink.Template.SetParameter("id", 45);
+            var request = aboutlink.CreateRequest();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -125,14 +131,14 @@ namespace LinkTests
         public void Update_query_parameters()
         {
             var linkFactory = new LinkFactory();
-            var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?id=23"));
-            
+            var relatedLink = linkFactory.CreateLink<RelatedLink>();
+            relatedLink.Target = new Uri("http://example.org/customer?id=23");
 
-            var parameters = relatedLink.GetQueryStringParameters();
-            parameters["id"] = 45;
+            relatedLink.Template = new UriTemplate(relatedLink.Target.GetLeftPart(UriPartial.Path) + "{?id}");
+            relatedLink.Template.AddParameter("id",45);
 
-            var link = relatedLink.ApplyParameters(parameters,true);
-            var request = link.BuildRequestMessage();
+            //relatedLink.Template.AddParameters(parameters,true);
+            var request = relatedLink.CreateRequest();
 
             Assert.Equal("http://example.org/customer?id=45", request.RequestUri.OriginalString);
         }
@@ -144,16 +150,26 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
             
-
-            var parameters = relatedLink.GetQueryStringParameters();
-            parameters.Remove("format");
-
-            var link = relatedLink.ApplyParameters(parameters,true);
-            var request = link.BuildRequestMessage();
+            relatedLink.Template = relatedLink.Target.MakeTemplate();
+            relatedLink.Template.ClearParameter("format");
+            
+            var request = relatedLink.CreateRequest();
 
             Assert.Equal("http://example.org/customer?id=23", request.RequestUri.OriginalString);
         }
 
+        [Fact]
+        public void Remove_a_query_parameters2()
+        {
+            
+            var target = new Uri("http://example.org/customer?format=xml&id=23");
+
+            var template = target.MakeTemplate();
+            template.ClearParameter("format");
+
+            
+            Assert.Equal("http://example.org/customer?id=23", template.Resolve());
+        }
 
         [Fact]
         public void Use_non_get_method()
@@ -161,8 +177,8 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
 
-            var headLink = relatedLink.ChangeMethod(HttpMethod.Head);
-            var request = headLink.BuildRequestMessage();
+            relatedLink.Method = HttpMethod.Head;
+            var request = relatedLink.CreateRequest();
 
             Assert.Equal(HttpMethod.Head, request.Method);
         }
@@ -174,9 +190,9 @@ namespace LinkTests
             var linkFactory = new LinkFactory();
             var relatedLink = linkFactory.CreateLink<RelatedLink>(new Uri("http://example.org/customer?format=xml&id=23"));
 
-            var link = relatedLink.ChangeMethod(HttpMethod.Post);
-            link = link.AddPayload(new StringContent(""));
-            var request = link.BuildRequestMessage();
+            relatedLink.Method = HttpMethod.Post;
+            relatedLink.Content = new StringContent("");
+            var request = relatedLink.CreateRequest();
 
             Assert.Equal(HttpMethod.Post, request.Method);
         }

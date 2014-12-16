@@ -50,7 +50,7 @@ namespace LinkTests
             link.AddHint(hint);
             
             // Act
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             //Asset
             Assert.Equal(HttpMethod.Post,request.Method);            
@@ -85,7 +85,7 @@ namespace LinkTests
             link.AddHint(hint);
 
             // Act
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             Assert.Equal(foo,true);
         }

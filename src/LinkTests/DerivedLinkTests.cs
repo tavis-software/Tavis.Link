@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Tavis;
+using Tavis.RequestBuilders;
+using Tavis.UriTemplates;
 using Xunit;
 
 namespace LinkTests
@@ -18,9 +20,14 @@ namespace LinkTests
         [Fact]
         public void ResolveBingMapLinkUsingCreate()
         {
-            var link = new BingMapLink();
+            var link = new BingMapLink()
+            {
+                Lat = 45,
+                Long = -73,
+                Level = 10
+            };
 
-            var request = link.CreateRequest(45,-73);
+            var request = link.CreateRequest();
 
             Assert.Equal("http://www.bing.com/maps/?v=2&cp=45~-73&lvl=10", request.RequestUri.AbsoluteUri);
         }
@@ -46,9 +53,14 @@ namespace LinkTests
         [Fact]
         public void ResolveTranslateLinkUsingCreate()
         {
-            var link = new TranslationLink();
+            var link = new TranslationLink()
+            {
+                FromLanguage = "English",
+                ToLanguage = "French",
+                FromPhrase = "Hello"
+            };
 
-            var request = link.CreateRequest("English", "French",  "Hello");
+            var request = link.CreateRequest();
 
             Assert.Equal("http://api.microsofttranslator.com/V2/Http.svc/Translate?text=Hello&to=French&from=English", request.RequestUri.AbsoluteUri);
         }
@@ -60,64 +72,85 @@ namespace LinkTests
         public int Baz { get; set; }
     }
 
-    public static class UriExtensions
-    {
-        public static Uri AddToQuery<T>(this Uri requestUri,T dto)
-        {
-            Type t = typeof (T);
-            var properties = t.GetProperties();
-            var dictionary = properties.ToDictionary(info => info.Name, 
-                                                     info => info.GetValue(dto, null).ToString());
-            var formContent = new FormUrlEncodedContent(dictionary);
-
-            var uriBuilder = new UriBuilder(requestUri) {Query = formContent.ReadAsStringAsync().Result};
-
-            return uriBuilder.Uri;
-        }
-    }
     public class TranslationLink : Link
     {
+        [LinkParameter("from")]
+        public string FromLanguage { get; set; }
+        [LinkParameter("to")]
+        public string ToLanguage { get; set; }
+        [LinkParameter("text")]
+        public string FromPhrase { get; set; }
 
         public TranslationLink()
         {
-            Target = new Uri("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&to={tolanguage}&from={fromlanguage}");
+            Template = new UriTemplate("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&to={tolanguage}&from={fromlanguage}");
+            AddRequestBuilder(new InlineRequestBuilder(CreateRequest));
         }
 
-        public HttpRequestMessage CreateRequest(string fromLanguage, string toLanguage, string fromPhrase)
+        public HttpRequestMessage CreateRequest(HttpRequestMessage request)
         {
-            var parameters = new Dictionary<string, object>
-            {
-                {"fromlanguage", fromLanguage},
-                {"tolanguage", toLanguage},
-                {"fromphrase", fromPhrase}
-            };
-            var link = ApplyParameters(parameters);
+            request.RequestUri = new Uri( Template
+                    .AddParameter("fromlanguage",FromLanguage)
+                    .AddParameter("tolanguage",ToLanguage)
+                    .AddParameter("fromphrase",FromPhrase)
+                    .Resolve());
 
-            return link.BuildRequestMessage();
+            return request;
         }
     }
 
+    public class TranslationLink2 : IRequestFactory
+    {
+        private UriTemplate _Template;
+        
+        public TranslationLink2()
+        {
+            _Template = new UriTemplate("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&to={tolanguage}&from={fromlanguage}");
+
+        }
+
+        public string FromLanguage { get; set; }
+        public string ToLanguage { get; set; }
+        public string FromPhrase { get; set; }
+        
+        public HttpRequestMessage CreateRequest()
+        {
+
+            return  new HttpRequestMessage()
+            {
+                RequestUri = new Uri( _Template
+                    .AddParameter("fromlanguage",FromLanguage)
+                    .AddParameter("tolanguage",ToLanguage)
+                    .AddParameter("fromphrase",FromPhrase)
+                    .Resolve())
+            };
+        }
+    }
 
 
 
     public class BingMapLink : Link
     {
+        public double Lat { get; set; }
+        public double Long { get; set; }
+        public int Level { get; set; }
+
         public BingMapLink()
         {
-            Target = new Uri("http://www.bing.com/maps/?v=2&cp={lat}~{long}&lvl={level}");
+            Template = new UriTemplate("http://www.bing.com/maps/?v=2&cp={lat}~{long}&lvl={level}");
         }
 
-        public HttpRequestMessage CreateRequest(double latitude, double longitude, int level = 10)
-        {
-            var parameters = new Dictionary<string, object>
-            {
-                {"lat", latitude },
-                {"long", longitude},
-                {"level", level}
-            };
-            var link = this.ApplyParameters(parameters);
-            return link.BuildRequestMessage();
-        }
+        //public HttpRequestMessage CreateRequest(double latitude, double longitude, int level = 10)
+        //{
+        //    var parameters = new Dictionary<string, object>
+        //    {
+        //        {"lat", latitude },
+        //        {"long", longitude},
+        //        {"level", level}
+        //    };
+        //    var link = this.ApplyParameters(parameters);
+        //    return link.CreateRequest();
+        //}
     }
 
     public class BingMapLink2 : Link
@@ -126,11 +159,6 @@ namespace LinkTests
         public BingMapLink2()
         {
             Target = new Uri("http://www.bing.com/maps/?v=2&cp={lat}~{long}&lvl={level}");
-            this.HttpRequestBuilder = new InlineRequestBuilder((r) =>
-            {
-                var link = this.ApplyParameters(_Parameters);
-                return link.BuildRequestMessage();
-            });
         }
 
         

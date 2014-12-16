@@ -12,12 +12,18 @@ namespace Tavis
     {
         public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, Link link)
         {
-            return httpClient.SendAsync(link.BuildRequestMessage())
+            return httpClient.FollowLinkAsync(link as IRequestFactory, link as IResponseHandler);
+        }
+
+
+        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, IRequestFactory requestFactory, IResponseHandler handler)
+        {
+            return httpClient.SendAsync(requestFactory.CreateRequest())
                 .ContinueWith(t =>
                 {
-                    if (t.IsCompleted && link.HttpResponseHandler != null)
+                    if (t.IsCompleted && handler != null)
                     {
-                        return link.HandleResponseAsync(t.Result);
+                        return handler.HandleResponseAsync(t.Result);
                     }
                     return t; 
                 }).Unwrap();
@@ -26,7 +32,7 @@ namespace Tavis
 
         public static Task<HttpResponseMessage> EmbedLinkAsync(this HttpClient httpClient, Link link, IEmbedTarget embedTarget)
         {
-            return httpClient.SendAsync(link.BuildRequestMessage())
+            return httpClient.SendAsync(link.CreateRequest())
                 .ContinueWith(t =>
                 {
                     if (t.Status == TaskStatus.RanToCompletion)

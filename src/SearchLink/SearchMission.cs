@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using LinkTests;
 
 namespace Tavis.Search
 {
@@ -19,14 +20,14 @@ namespace Tavis.Search
         {
             var openSearchDescription = await LoadOpenSearchDescription();
             var link = openSearchDescription.Url;
-            link = link.ApplyParameters(new Dictionary<string, object> {{"searchTerms", param}});
+            link.Template.ApplyParametersToTemplate(new Dictionary<string, object> {{"searchTerms", param}});
 
-            return await _httpClient.SendAsync(link.BuildRequestMessage());
+            return await _httpClient.SendAsync(link.CreateRequest());
         }
 
         private async Task<OpenSearchDescription> LoadOpenSearchDescription()
         {
-            var response = await _httpClient.SendAsync(_link.BuildRequestMessage());
+            var response = await _httpClient.SendAsync(_link.CreateRequest());
             var desc = await response.Content.ReadAsStreamAsync();
             return new OpenSearchDescription(response.Content.Headers.ContentType, desc);
         }

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Tavis;
+using Tavis.UriTemplates;
 using Xunit;
 
 namespace LinkTests
@@ -22,7 +23,7 @@ namespace LinkTests
         {
             var link = new Link() { Target = new Uri("Http://localhost") };
 
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             Assert.Equal(HttpMethod.Get,request.Method);
         }
@@ -44,7 +45,7 @@ namespace LinkTests
             }));
 
 
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             Assert.True(request.Headers.Accept.Any(h => h.MediaType == "application/vnd.hal"));
         }
@@ -53,12 +54,14 @@ namespace LinkTests
         [Fact]
         public void SettingContentShouldBePassedToTheRequest()
         {
-            var link = new Link { Target = new Uri("Http://localhost") };
+            var link = new Link
+            {
+                Target = new Uri("Http://localhost"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("Hello World")
+            };
 
-            link = link.ChangeMethod(HttpMethod.Post);
-            link = link.AddPayload(new StringContent("Hello World"));
-
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             Assert.Equal(request.Content.ReadAsStringAsync().Result, "Hello World");
         }
@@ -70,7 +73,7 @@ namespace LinkTests
             var link = new Link { Target = new Uri("Http://localhost") };
             var client = new HttpClient(new FakeMessageHandler());
 
-            var response = client.SendAsync(link.BuildRequestMessage()).Result;
+            var response = client.SendAsync(link.CreateRequest()).Result;
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -83,7 +86,7 @@ namespace LinkTests
             var link = new Link { Target = new Uri("Http://localhost") }; 
             var client = new HttpClient(new FakeMessageHandler());
 
-            var response = client.SendAsync(link.BuildRequestMessage()).Result;
+            var response = client.SendAsync(link.CreateRequest()).Result;
 
             Assert.Equal("http://localhost/", response.RequestMessage.RequestUri.AbsoluteUri);
         }
@@ -108,14 +111,14 @@ namespace LinkTests
         [Fact]
         public void AddParameterToLink()
         {
-            var link = new Link(){ Target = new Uri("http://localhost/{?foo}")};
+            var link = new Link(){ Template = new UriTemplate("http://localhost/{?foo}")};
         
             var client = new HttpClient(new FakeMessageHandler());
 
-            link = link.ApplyParameters(new Dictionary<string, object> {{"foo", "bar"}});
+            link.Template.AddParameter("foo", "bar");
             
 
-            var response = client.SendAsync(link.BuildRequestMessage()).Result;
+            var response = client.SendAsync(link.CreateRequest()).Result;
 
             Assert.Equal("http://localhost/?foo=bar", response.RequestMessage.RequestUri.AbsoluteUri);
         }
@@ -124,16 +127,16 @@ namespace LinkTests
         [Fact]
         public void AddMultipleParametersToLink()
         {
-            var link = new Link() { Target = new Uri("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
+            var link = new Link() { Template = new UriTemplate("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
 
-            link = link.ApplyParameters(new Dictionary<string, object>
+            link.Template.ApplyParametersToTemplate(new Dictionary<string, object>
             {
                 {"foo", "bar"},
                 {"baz", "99"},
                 {"dataset", "bob"}
             });
 
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
             
             Assert.Equal("http://localhost/api/bob/customer?foo=bar&baz=99", request.RequestUri.AbsoluteUri);
         }
@@ -155,9 +158,9 @@ namespace LinkTests
         [Fact]
         public void IdentifyParametersInTemplate()
         {
-            var link = new Link() { Target = new Uri("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
+            var link = new Link() { Template = new UriTemplate("http://localhost/api/{dataset}/customer{?foo,bar,baz}") };
 
-            var parameters = link.GetParameterNames();
+            var parameters = link.Template.GetParameterNames();
 
             Assert.Equal(4, parameters.Count());
             Assert.True(parameters.Contains("dataset"));
@@ -187,27 +190,15 @@ namespace LinkTests
         [Fact]
         public void UnsetParameterInLink()
         {
-            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
+            var link = new Link() { Template = new UriTemplate("http://localhost/{?foo}") };
 
-            link = link.ApplyParameters(new Dictionary<string, object>());
-            var request = link.BuildRequestMessage();
+            var request = link.CreateRequest();
 
             Assert.Equal("http://localhost/", request.RequestUri.AbsoluteUri);
         }
 
 
         
-        [Fact]
-        public void SetListParameterInLink()
-        {
-            var link = new Link() { Target = new Uri("http://localhost/{?foo}") };
-
-            link = link.ApplyParameters(new Dictionary<string, object> { { "foo", new List<string>() { "bar", "baz", "bler" } } });
-
-            var request = link.BuildRequestMessage();
-
-            Assert.Equal("http://localhost/?foo=bar,baz,bler", request.RequestUri.AbsoluteUri);
-        }
 
         [Fact]
         public void CreateLinkHeader()
@@ -232,7 +223,7 @@ namespace LinkTests
             var link = new Link()
             {
                 Target = new Uri("http://localhost/{?foo}"),
-                Type = new MediaTypeHeaderValue("application/foo")
+                Type = "application/foo"
             };
             link.HrefLang.Add(new CultureInfo("en-GB"));
             link.HrefLang.Add(new CultureInfo("en-CA"));
@@ -257,24 +248,7 @@ namespace LinkTests
         }
 
 
-        [Fact]
-        public void SOQuestion18302092()
-        {
-            var link = new Link();
-            link.Target = new Uri("http://www.myBase.com/get{?a,b}");
-
-            var parameters = new Dictionary<string, object>
-            {
-                {"a","1"},
-                {"b", "c"}
-            };
-            link = link.ApplyParameters(parameters);
-            var request = link.BuildRequestMessage();
-            Assert.Equal("http://www.myBase.com/get?a=1&b=c", request.RequestUri.OriginalString);
-            
-            
-        }
-
+        
         //[Fact]
         //public void TestTranslateLink()
         //{

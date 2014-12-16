@@ -131,7 +131,7 @@ namespace Tavis
         link.Relation = rel;
         link.Title=  title_s ?? title;
     
-        if (!String.IsNullOrEmpty(type)) link.Type = MediaTypeHeaderValue.Parse(type);
+        if (!String.IsNullOrEmpty(type)) link.Type = type;
       return link;
     }
 

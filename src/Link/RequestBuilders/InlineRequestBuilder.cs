@@ -13,7 +13,7 @@ namespace Tavis
             _customizeRequest = customizeRequest;
         }
 
-        protected override HttpRequestMessage ApplyChanges(HttpRequestMessage request)
+        protected override HttpRequestMessage ApplyChanges(Link link,HttpRequestMessage request)
         {
             return _customizeRequest(request);
         }

@@ -84,11 +84,10 @@
       <HintPath>..\..\packages\Microsoft.Bcl.1.1.9\lib\portable-net40+sl5+win8+wp8+wpa81\System.Threading.Tasks.dll</HintPath>
     </Reference>
     <Reference Include="Tavis.UriTemplates">
-      <HintPath>..\..\packages\Tavis.UriTemplates.0.5-beta1\lib\portable-net45+sl5+wp8+win8+wpa81+MonoTouch1+MonoAndroid1\Tavis.UriTemplates.dll</HintPath>
+      <HintPath>..\..\packages\Tavis.UriTemplates.0.6.1\lib\portable-net45+sl5+wp8+win8+wpa81+MonoTouch1+MonoAndroid1\Tavis.UriTemplates.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
- 
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
