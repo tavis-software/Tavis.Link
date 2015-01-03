@@ -9,6 +9,6 @@ namespace Tavis
 {
     public interface IResponseHandler
     {
-        Task<HttpResponseMessage> HandleResponseAsync(HttpResponseMessage responseMessage);
+        Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage);
     }
 }

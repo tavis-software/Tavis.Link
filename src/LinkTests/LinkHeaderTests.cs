@@ -80,7 +80,7 @@ namespace LinkTests
             var linkRegistry = new LinkFactory();
             var response = new HttpResponseMessage();
             response.RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://example.org/") };
-            var list = new List<Link>() { 
+            var list = new List<ILink>() { 
                 new AboutLink() { Target = new Uri("http://example.org/about")},
                 new HelpLink() { Target = new Uri("http://example.org/help") }
             };

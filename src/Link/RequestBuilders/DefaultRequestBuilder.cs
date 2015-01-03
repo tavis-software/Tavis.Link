@@ -4,37 +4,91 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Xml.Linq;
+using Tavis.RequestBuilders;
 using Tavis.UriTemplates;
 
 namespace Tavis
 {
     public class DefaultRequestBuilder : DelegatingRequestBuilder
     {
-        protected override HttpRequestMessage ApplyChanges(Link link, HttpRequestMessage request)
+        protected override HttpRequestMessage ApplyChanges(ILink stdlink, HttpRequestMessage request)
         {
-            // if there is a template, then get parameters and try and find property values
-            if (link.Template != null)
-            {
-                var parameters = link.Template.GetParameterNames();
-                var props = link.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                var matchingProps = props.Where(p => 
-                    parameters.Any(n => String.Compare(n,p.Name,StringComparison.OrdinalIgnoreCase) == 0)).ToList();
+            var link = stdlink as Link;
 
-                foreach (var prop in matchingProps)
+            if (link != null)
+            {
+                // if there is a template, then get parameters and try and find property values
+                if (link.Template != null)
                 {
-                    link.Template.AddParameter(prop.Name.ToLower(), prop.GetValue(link,null));
+
+                    var matchingProps = GetBindingProperties(link)
+                        .Where(p => link.Template.GetParameterNames()
+                                    .Any(n => String.Compare(n, p.Key, StringComparison.OrdinalIgnoreCase) == 0))
+                        .ToList();
+
+                    foreach (var prop in matchingProps)
+                    {
+                        object value = prop.Value.PropertyInfo.GetValue(link, null);
+                        object defaultValue = GetDefault(prop.Value);
+                        if (!value.Equals(defaultValue))
+                        {
+                            link.Template.AddParameter(prop.Key, value);
+                        }
+                    }
+                    link.Target = new Uri(link.Template.Resolve());
                 }
-                link.Target = new Uri(link.Template.Resolve());
+
+                request.Method = link.Method;
+                
+                request.Content = link.Content;
+
+                request = ApplyHints(request, link.GetHints());
             }
 
-            request.Method = link.Method;
-            request.RequestUri = link.Target;
-            request.Content = link.Content;
-
-            request = ApplyHints(request, link.GetHints());
-
-
+            request.RequestUri = stdlink.Target;
             return request;
+        }
+
+        internal static object GetDefault(ParameterInfo info)
+        {
+            if (info.Attribute != null)
+            {
+                return info.Attribute.Default;
+            }
+
+            if (info.PropertyInfo.PropertyType.IsValueType)
+            {
+                return Activator.CreateInstance(info.PropertyInfo.PropertyType);
+            }
+            return null;
+        }
+
+        private static Dictionary<string, ParameterInfo> GetBindingProperties(Link link)
+        {
+            var props = link.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Select(p => new ParameterInfo()
+                {
+                    PropertyInfo = p,
+                    Attribute = p.GetCustomAttributes(typeof (LinkParameterAttribute), true)
+                            .Cast<LinkParameterAttribute>()
+                            .FirstOrDefault()
+                })
+                .ToDictionary(pi =>
+                {
+                    if (pi.Attribute == null)
+                    {
+                        return pi.PropertyInfo.Name.ToLowerInvariant();
+                    }
+                    return pi.Attribute.Name;
+                }, pr => pr);
+            return props;
+        }
+
+        internal class ParameterInfo
+        {
+            public PropertyInfo PropertyInfo { get; set; }
+            public LinkParameterAttribute Attribute { get; set; }
         }
 
         public static HttpRequestMessage ApplyHints(HttpRequestMessage requestMessage, IEnumerable<Hint> hints)

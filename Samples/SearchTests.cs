@@ -9,7 +9,7 @@ namespace Samples
 {
     public class SearchTests
     {
-        [Fact]
+        //[Fact]
         public void SearchForFoo()
         {
             var httpClient = new HttpClient();

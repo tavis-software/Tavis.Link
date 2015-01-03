@@ -8,6 +8,7 @@ namespace Tavis
 {
     public interface IRequestFactory
     {
+        string LinkRelation { get; }
         HttpRequestMessage CreateRequest();
     }
 }

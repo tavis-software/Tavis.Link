@@ -9,17 +9,15 @@ namespace LinkTests
 {
     public static class UriExtensions
     {
-        public static Uri AddToQuery<T>(this Uri requestUri,T dto)
+        
+
+        public static Dictionary<string, object> ObjectToDictionary<T>(T dto)
         {
             Type t = typeof (T);
             var properties = t.GetProperties();
-            var dictionary = properties.ToDictionary(info => info.Name, 
-                info => info.GetValue(dto, null).ToString());
-            var formContent = new FormUrlEncodedContent(dictionary);
-
-            var uriBuilder = new UriBuilder(requestUri) {Query = formContent.ReadAsStringAsync().Result};
-
-            return uriBuilder.Uri;
+            var dictionary = properties.ToDictionary(info => info.Name,
+                info => info.GetValue(dto, null));
+            return dictionary;
         }
 
         public static Uri AddToQuery(this Uri requestUri, Dictionary<string,string> values)
@@ -31,6 +29,7 @@ namespace LinkTests
 
             return uriBuilder.Uri;
         }
+
         public static Dictionary<string, object> GetQueryStringParameters(this Uri target )
         {
             Uri uri = target;

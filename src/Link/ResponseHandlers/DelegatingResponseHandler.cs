@@ -6,7 +6,7 @@ namespace Tavis
     /// <summary>
     /// HttpResponseHandler that can be chained into a response pipeline
     /// </summary>
-    public abstract class DelegatingResponseHandler : IHttpResponseHandler
+    public abstract class DelegatingResponseHandler 
     {
         public DelegatingResponseHandler InnerResponseHandler { get; set; }
 
@@ -20,11 +20,11 @@ namespace Tavis
             InnerResponseHandler = innerResponseHandler;
         }
 
-        public virtual Task<HttpResponseMessage> HandleAsync(Link link, HttpResponseMessage responseMessage)
+        public virtual Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
         {
             if (InnerResponseHandler != null)
             {
-                return InnerResponseHandler.HandleAsync(link, responseMessage);
+                return InnerResponseHandler.HandleResponseAsync(linkRelation, responseMessage);
             }
 
             var tcs = new TaskCompletionSource<HttpResponseMessage>();

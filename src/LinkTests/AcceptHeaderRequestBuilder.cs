@@ -14,7 +14,7 @@ namespace LinkTests
             _AcceptHeader = acceptHeaders;
         }
 
-        protected override HttpRequestMessage ApplyChanges(Link link, HttpRequestMessage request)
+        protected override HttpRequestMessage ApplyChanges(ILink link, HttpRequestMessage request)
         {
             request.Headers.Accept.Clear();
             foreach (var headerValue in _AcceptHeader)

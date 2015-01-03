@@ -15,7 +15,7 @@ namespace Samples
     {
 
 
-        [Fact]
+        //[Fact]
         public void CreateRequestForAuthCode()
         {
             var authLink = new OAuth2AuthorizeLink()
@@ -34,7 +34,7 @@ namespace Samples
         }
 
 
-        [Fact]
+        //[Fact]
         public void GetAccessToken()
         {
             var tokenLink = new OAuth2TokenLink()
@@ -66,7 +66,7 @@ namespace Samples
             }
         }
 
-        [Fact]
+        //[Fact]
         public void UploadFileToSkyDrive()
         {
 

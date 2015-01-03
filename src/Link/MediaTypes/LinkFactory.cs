@@ -10,7 +10,7 @@ namespace Tavis
     /// <summary>
     /// 
     /// </summary>
-    public class LinkFactory 
+    public class LinkFactory : ILinkFactory
     {
         private readonly Dictionary<string, LinkRegistration>  _LinkRegistry = new Dictionary<string, LinkRegistration>(StringComparer.OrdinalIgnoreCase);
 
@@ -113,7 +113,7 @@ namespace Tavis
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddLinkType<T>() where T : Link, new()
+        public void AddLinkType<T>() where T : ILink, new()
         {
             var t = new T();
             _LinkRegistry.Add(t.Relation, new LinkRegistration() {LinkType =typeof(T) } ); 
@@ -124,7 +124,7 @@ namespace Tavis
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="handler"></param>
-        public void SetHandler<T>(IHttpResponseHandler handler) where T : Link, new()
+        public void SetHandler<T>(DelegatingResponseHandler handler) where T : ILink, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
@@ -132,28 +132,28 @@ namespace Tavis
         }
 
 
-        public void SetRequestBuilder<T>(IEnumerable<DelegatingRequestBuilder> builders) where T : Link, new()
+        public void SetRequestBuilder<T>(IEnumerable<DelegatingRequestBuilder> builders) where T : ILink, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
 
-            IHttpRequestBuilder builderList = new DefaultRequestBuilder();
+            DelegatingRequestBuilder currentBuilder=null;
             foreach (var requestBuilder in builders.Reverse())
             {
-                requestBuilder.NextBuilder = builderList;
-                builderList = (IHttpRequestBuilder) requestBuilder;
+                requestBuilder.NextBuilder = currentBuilder;
+                currentBuilder = requestBuilder;
             }
-            reg.RequestBuilder = builderList;
+            reg.RequestBuilder = currentBuilder;
         }
 
-        public void SetRequestBuilder<T>(DelegatingRequestBuilder builder) where T : Link, new()
+        public void SetRequestBuilder<T>(DelegatingRequestBuilder builder) where T : ILink, new()
         {
             SetRequestBuilder<T>(new []{builder});
         }
 
         public void SetRequestBuilder(Type linkType, DelegatingRequestBuilder builder) 
         {
-            var t = (Link)Activator.CreateInstance(linkType);
+            var t = (ILink)Activator.CreateInstance(linkType);
             var reg = _LinkRegistry[t.Relation];
             reg.RequestBuilder = builder;
         }
@@ -163,7 +163,7 @@ namespace Tavis
         /// </summary>
         /// <param name="relation"></param>
         /// <returns></returns>
-        public Link CreateLink(string relation)
+        public ILink CreateLink(string relation)
         {
             if (!_LinkRegistry.ContainsKey(relation))
             {
@@ -173,8 +173,12 @@ namespace Tavis
                     };
             }
             var reg = _LinkRegistry[relation];
-            var t = Activator.CreateInstance(reg.LinkType) as Link;
-            t.HttpResponseHandler = reg.ResponseHandler;
+            var t = Activator.CreateInstance(reg.LinkType) as ILink;
+            var link = t as Link;
+            if (link != null)
+            {
+                link.AddResponseHandler(reg.ResponseHandler);
+            }
             return t;
 
         }
@@ -184,13 +188,17 @@ namespace Tavis
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T CreateLink<T>() where T : Link, new()
+        public T CreateLink<T>() where T : ILink, new()
         {
             var t = new T();
             var reg = _LinkRegistry[t.Relation];
-            t.HttpResponseHandler = reg.ResponseHandler;
-            if (reg.RequestBuilder != null) t.HttpRequestBuilder = reg.RequestBuilder;
-            
+            var link = t as Link;
+            if (link != null)
+            {
+                link.AddResponseHandler(reg.ResponseHandler);
+                if (reg.RequestBuilder != null) link.AddRequestBuilder(reg.RequestBuilder);
+            }
+
             return t;
         }
 
@@ -206,9 +214,18 @@ namespace Tavis
     public class LinkRegistration
     {
         public Type LinkType { get; set; }
-        public IHttpResponseHandler ResponseHandler { get; set; }
-        public IHttpRequestBuilder RequestBuilder { get; set; }
+        public DelegatingResponseHandler ResponseHandler { get; set; }
+        public DelegatingRequestBuilder RequestBuilder { get; set; }
     }
 
+
+    public static class ILinkFactoryExtensions
+    {
+        public static ILink CreateLink<T>(this ILinkFactory linkFactory)
+        {
+            var rel = LinkHelper.GetLinkRelationTypeName<T>();
+            return linkFactory.CreateLink(rel);
+        }
    
+    }
 }

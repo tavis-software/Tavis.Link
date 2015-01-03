@@ -1,12 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7DB640D5-5B64-4468-8918-FBBF76710223}"
 	ProjectSection(SolutionItems) = preProject
 		readme.md = readme.md
 		ReleaseNotes.md = ReleaseNotes.md
+		build\Tavis.Link.nuspec = build\Tavis.Link.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Link", "src\Link\Link.csproj", "{4D56A07D-3985-4D1C-86E3-094F4961CC25}"
@@ -18,6 +19,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples", "Samples\Samples.csproj", "{AB1ADAF9-AF24-49BE-A505-14CDB6DC6E60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchLink", "src\SearchLink\SearchLink.csproj", "{61B56B9C-088A-492C-A988-A4C96AA2A9D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubLib", "Samples\GitLinks\GitHubLib\GitHubLib.csproj", "{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitHubLibTests", "Samples\GitLinks\GitHubLibTests\GitHubLibTests.csproj", "{015AFC11-4B1C-42FE-8247-989B9A9F50F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +84,26 @@ Global
 		{61B56B9C-088A-492C-A988-A4C96AA2A9D3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{61B56B9C-088A-492C-A988-A4C96AA2A9D3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{61B56B9C-088A-492C-A988-A4C96AA2A9D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4B1C40F5-0DC9-4CC0-9CBA-ACF94646A1AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{015AFC11-4B1C-42FE-8247-989B9A9F50F2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

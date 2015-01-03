@@ -11,39 +11,13 @@ namespace Tavis
         /// </summary>
         /// <param name="link"></param>
         /// <param name="responseHandler"></param>
-        public static void AddHandler(this Link link, DelegatingResponseHandler responseHandler)
-        {
-           
-            if (link.HttpResponseHandler == null)
-            {
-                link.HttpResponseHandler = responseHandler;
-            }
-            else
-            {
-                var currentHandler = link.HttpResponseHandler as DelegatingResponseHandler;
-                if (currentHandler == null) throw new Exception("Cannot add handler unless existing handler is a delegating handler");
-            
-                while (currentHandler != null)
-                {
-                    if (currentHandler.InnerResponseHandler == null)
-                    {
-                        currentHandler.InnerResponseHandler = responseHandler;
-                        currentHandler = null;
-                    }
-                    else
-                    {
-                        currentHandler = currentHandler.InnerResponseHandler;
-                    } 
-                }
-            }
-        }
 
         /// <summary>
         /// Serialize link in format that can be returned as a HttpHeader
         /// </summary>
         /// <param name="link"></param>
         /// <returns></returns>
-        public static string AsLinkHeader(this Link link)
+        public static string AsLinkHeader(this ILink link)
         {
             var headerValue = new StringBuilder();
             headerValue.Append("<");

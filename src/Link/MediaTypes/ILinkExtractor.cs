@@ -11,7 +11,7 @@ namespace Tavis
     public interface ILinkExtractor
     {
             Type SupportedType { get; }
-            Link GetLink(Func<string, Link> factory, object content, string relation, string anchor = null);
-            IEnumerable<Link> GetLinks(Func<string,Link> factory, object content, string relation = null, string anchor = null);
+            ILink GetLink(Func<string, ILink> factory, object content, string relation, string anchor = null);
+            IEnumerable<ILink> GetLinks(Func<string,ILink> factory, object content, string relation = null, string anchor = null);
     }
 }

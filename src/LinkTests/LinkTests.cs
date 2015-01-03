@@ -93,16 +93,16 @@ namespace LinkTests
 
 
         [Fact]
-        public void FollowLink()
+        public async Task FollowLink()
         {
             var link = new Link { Target = new Uri("Http://localhost") };
             var client = new HttpClient(new FakeMessageHandler());
 
             var uri = string.Empty;
-            link.HttpResponseHandler = new ActionResponseHandler(r => uri = r.RequestMessage.RequestUri.AbsoluteUri);
-            var task = client.FollowLinkAsync(link);
+            link.AddResponseHandler(new InlineResponseHandler((rel,r) => uri = r.RequestMessage.RequestUri.AbsoluteUri));
+            await client.FollowLinkAsync(link);
 
-            task.Wait();
+            
 
             Assert.Equal("http://localhost/", uri);
         }

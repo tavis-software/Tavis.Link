@@ -10,13 +10,13 @@ namespace Tavis
     public static class HttpHeaderExtensions
     {
         
-        public static void AddLinkHeader(this HttpHeaders headers, Link link )
+        public static void AddLinkHeader(this HttpHeaders headers, ILink link )
         {
             var headerValue = link.AsLinkHeader();
             headers.Add("Link", headerValue);
         }
 
-        public static void AddLinkHeaders(this HttpHeaders headers, List<Link> links)
+        public static void AddLinkHeaders(this HttpHeaders headers, List<ILink> links)
         {
             string headerValue = string.Empty;
             foreach (var link in links)
@@ -32,14 +32,14 @@ namespace Tavis
 
         
         
-        public static List<Link> ParseLinkHeaders(this HttpResponseMessage responseMessage, LinkFactory linkRegistry)
+        public static List<ILink> ParseLinkHeaders(this HttpResponseMessage responseMessage, ILinkFactory linkRegistry)
         {
             return ParseLinkHeaders(responseMessage.Headers, responseMessage.RequestMessage.RequestUri, linkRegistry);
         }
 
-        public static List<Link> ParseLinkHeaders(this HttpHeaders headers, Uri baseUri, LinkFactory linkRegistry)
+        public static List<ILink> ParseLinkHeaders(this HttpHeaders headers, Uri baseUri, ILinkFactory linkRegistry)
         {
-            var list = new List<Link>();
+            var list = new List<ILink>();
             var parser = new LinkHeaderParser(linkRegistry);
             var linkHeaders = headers.GetValues("Link");
             foreach (var linkHeader in linkHeaders)
@@ -49,7 +49,7 @@ namespace Tavis
             return list;
         }
 
-        public static IList<Link> ParseLinkHeader(this Link link, string linkHeader, LinkFactory linkRegistry)
+        public static IList<ILink> ParseLinkHeader(this ILink link, string linkHeader, ILinkFactory linkRegistry)
         {
             var parser = new LinkHeaderParser(linkRegistry);
             return parser.Parse(link.Target, linkHeader);

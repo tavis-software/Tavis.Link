@@ -9,23 +9,25 @@ namespace LinkTests
     
     public class NotFoundHandler : DelegatingResponseHandler
     {
+        public bool NotFound = false;
         public NotFoundHandler(DelegatingResponseHandler innerHandler) : base(innerHandler)
         {
             
         }
 
-        public override Task<HttpResponseMessage> HandleAsync(Link link, HttpResponseMessage responseMessage)
+        public override Task<HttpResponseMessage> HandleResponseAsync(string link, HttpResponseMessage responseMessage)
         {
             if (responseMessage.StatusCode == HttpStatusCode.NotFound)
             {
                 Console.WriteLine("Not found");
+                NotFound = true;
                 var tcs = new TaskCompletionSource<HttpResponseMessage>();
                 tcs.SetResult(responseMessage);
                 return tcs.Task;
             }
             else
             {
-                return base.HandleAsync(link, responseMessage);
+                return base.HandleResponseAsync(link, responseMessage);
             }
         }
     }
@@ -37,7 +39,7 @@ namespace LinkTests
 
         }
 
-        public override Task<HttpResponseMessage> HandleAsync(Link link, HttpResponseMessage responseMessage)
+        public override Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
         {
             if (responseMessage.StatusCode == HttpStatusCode.OK)
             {
@@ -48,7 +50,7 @@ namespace LinkTests
             }
             else
             {
-                return base.HandleAsync(link, responseMessage);
+                return base.HandleResponseAsync(linkRelation, responseMessage);
             }
         }
     }

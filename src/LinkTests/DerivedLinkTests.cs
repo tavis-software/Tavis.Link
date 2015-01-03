@@ -15,8 +15,6 @@ namespace LinkTests
     {
 
 
-        
-
         [Fact]
         public void ResolveBingMapLinkUsingCreate()
         {
@@ -43,9 +41,9 @@ namespace LinkTests
             };
             
             var uri = new Uri("http://example.org/blah");
-            var uri2 = uri.AddToQuery(foo);
+            var uri2 = uri.MakeTemplate(UriExtensions.ObjectToDictionary(foo));
 
-            Assert.Equal("http://example.org/blah?Bar=hello+world&Baz=10", uri2.AbsoluteUri);
+            Assert.Equal("http://example.org/blah?Bar=hello%20world&Baz=10", uri2.Resolve());
         }
 
 
@@ -54,6 +52,20 @@ namespace LinkTests
         public void ResolveTranslateLinkUsingCreate()
         {
             var link = new TranslationLink()
+            {
+                FromLanguage = "English",
+                ToLanguage = "French",
+                FromPhrase = "Hello"
+            };
+
+            var request = link.CreateRequest();
+
+            Assert.Equal("http://api.microsofttranslator.com/V2/Http.svc/Translate?text=Hello&to=French&from=English", request.RequestUri.AbsoluteUri);
+        }
+        [Fact]
+        public void ResolveTranslateLinkUsingCreate2()
+        {
+            var link = new TranslationLink2()
             {
                 FromLanguage = "English",
                 ToLanguage = "French",
@@ -83,22 +95,13 @@ namespace LinkTests
 
         public TranslationLink()
         {
-            Template = new UriTemplate("http://api.microsofttranslator.com/V2/Http.svc/Translate?text={fromphrase}&to={tolanguage}&from={fromlanguage}");
-            AddRequestBuilder(new InlineRequestBuilder(CreateRequest));
+            Template = new UriTemplate("http://api.microsofttranslator.com/V2/Http.svc/Translate{?text,to,from}");
         }
 
-        public HttpRequestMessage CreateRequest(HttpRequestMessage request)
-        {
-            request.RequestUri = new Uri( Template
-                    .AddParameter("fromlanguage",FromLanguage)
-                    .AddParameter("tolanguage",ToLanguage)
-                    .AddParameter("fromphrase",FromPhrase)
-                    .Resolve());
-
-            return request;
-        }
+        
     }
 
+    // Does not derive from Link
     public class TranslationLink2 : IRequestFactory
     {
         private UriTemplate _Template;
@@ -112,7 +115,9 @@ namespace LinkTests
         public string FromLanguage { get; set; }
         public string ToLanguage { get; set; }
         public string FromPhrase { get; set; }
-        
+
+        public string LinkRelation { get { return "TransalationLink"; } }
+
         public HttpRequestMessage CreateRequest()
         {
 

@@ -23,5 +23,10 @@ namespace Tavis.RequestBuilders
         {
             get { return _name; }
         }
+        public object Default
+        {
+            get;
+            set;
+        }
     }
 }

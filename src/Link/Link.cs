@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LinkTests;
@@ -14,40 +12,6 @@ using Tavis.UriTemplates;
 
 namespace Tavis
 {
-
-    public class LinkAttributes: ILink
-    {
-        protected readonly Dictionary<string, string> _LinkExtensions = new Dictionary<string, string>();
-
-        public Uri Context { get; set; }
-        public Uri Target { get; set; }
-        public string Relation { get; set; }
-        public string Anchor { get; set; }
-        public string Rev { get; set; }
-        public string Title { get; set; }
-        public Encoding TitleEncoding { get; set; }
-        public List<CultureInfo> HrefLang { get; set; }
-        public string Media { get; set; }
-        public string Type { get; set; }
-        public IEnumerable<KeyValuePair<string, string>> LinkExtensions { get { return _LinkExtensions; } }
-
-        public LinkAttributes()
-        {
-            TitleEncoding = Encoding.UTF8;  // Should be ASCII but PCL does not support ascii and UTF8 does not change ASCII values 
-            HrefLang = new List<CultureInfo>();
- 
-        }
-        public string GetLinkExtension(string name)
-        {
-            return _LinkExtensions[name];
-        }
-
-        public void SetLinkExtension(string name, string value)
-        {
-            _LinkExtensions[name] = value;
-        }
-    }
-
     /// <summary>
     /// Link class augments the base LinkAttributes class with abilities to:
     ///     - create HttpRequestMessage
@@ -68,6 +32,8 @@ namespace Tavis
         // Server Defined Attrbutes
         private Dictionary<string, Hint> _Hints = new Dictionary<string, Hint>();
         private UriTemplate _template;
+        private DelegatingRequestBuilder _httpRequestBuilder;
+        private DelegatingResponseHandler _httpResponseHandler;
 
         public UriTemplate Template
         {
@@ -83,20 +49,21 @@ namespace Tavis
             set { _template = value; }
         }
 
-        public IHttpResponseHandler HttpResponseHandler { get; set; }
-        public IHttpRequestBuilder HttpRequestBuilder { get; set; }
-
-
+        
         public Link()
         {
             Method = HttpMethod.Get;
             Relation = LinkHelper.GetLinkRelationTypeName(GetType());
-            HttpRequestBuilder = new DefaultRequestBuilder();
+            _httpRequestBuilder = new DefaultRequestBuilder();
         }
 
+        public string LinkRelation
+        {
+            get { return Relation; }
+        }
         public HttpRequestMessage CreateRequest()
         {
-            return HttpRequestBuilder.Build(this,new HttpRequestMessage());
+            return _httpRequestBuilder.Build(this,new HttpRequestMessage());
         }
  
         public Link Clone() 
@@ -104,8 +71,8 @@ namespace Tavis
             var type = this.GetType();
             var newLink = (Link)Activator.CreateInstance(type);
 
-            newLink.HttpRequestBuilder = HttpRequestBuilder;  // Can these be copied by reference, or does it need to be by-value
-            newLink.HttpResponseHandler = HttpResponseHandler;
+            newLink._httpRequestBuilder = _httpRequestBuilder;  // Can these be copied by reference, or does it need to be by-value
+            newLink._httpResponseHandler = _httpResponseHandler;
             newLink._Hints = _Hints;
             newLink.Method = Method;
             newLink.Content = Content;
@@ -116,20 +83,26 @@ namespace Tavis
 
         public void AddRequestBuilder(Func<HttpRequestMessage,HttpRequestMessage> requestBuilderFunc )
         {
-            HttpRequestBuilder = new InlineRequestBuilder(requestBuilderFunc) { NextBuilder = HttpRequestBuilder }; ;
+            AddRequestBuilder( new InlineRequestBuilder(requestBuilderFunc));
         }
 
         public void AddRequestBuilder(DelegatingRequestBuilder requestBuilder)
         {
-            requestBuilder.NextBuilder = HttpRequestBuilder;
-            HttpRequestBuilder = requestBuilder;
+            if (_httpRequestBuilder != null)
+            {
+                _httpRequestBuilder.NextBuilder = requestBuilder;
+            }
+            else
+            {
+                _httpRequestBuilder = requestBuilder;
+            }           
         }
         
-        public Task<HttpResponseMessage> HandleResponseAsync(HttpResponseMessage responseMessage)
+        public Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
         {
-            if (HttpResponseHandler != null)
+            if (_httpResponseHandler != null)
             {
-                return HttpResponseHandler.HandleAsync(this, responseMessage);
+                return _httpResponseHandler.HandleResponseAsync(this.Relation, responseMessage);
             }
             var tcs = new TaskCompletionSource<HttpResponseMessage>();
             tcs.SetResult(responseMessage);
@@ -144,6 +117,38 @@ namespace Tavis
         public IEnumerable<Hint> GetHints()
         {
             return _Hints.Values;
+        }
+
+        public void AddResponseHandler(Action<string,HttpResponseMessage> responseHandlerFunc)
+        {
+            AddResponseHandler(new InlineResponseHandler(responseHandlerFunc, _httpResponseHandler));
+        }
+
+        public  void AddResponseHandler(DelegatingResponseHandler responseHandler)
+        {
+
+            if (_httpResponseHandler == null)
+            {
+                _httpResponseHandler = responseHandler;
+            }
+            else
+            {
+                var currentHandler = _httpResponseHandler as DelegatingResponseHandler;
+                if (currentHandler == null) throw new Exception("Cannot add handler unless existing handler is a delegating handler");
+
+                while (currentHandler != null)
+                {
+                    if (currentHandler.InnerResponseHandler == null)
+                    {
+                        currentHandler.InnerResponseHandler = responseHandler;
+                        currentHandler = null;
+                    }
+                    else
+                    {
+                        currentHandler = currentHandler.InnerResponseHandler;
+                    }
+                }
+            }
         }
 
         

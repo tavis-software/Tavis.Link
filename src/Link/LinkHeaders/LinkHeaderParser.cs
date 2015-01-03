@@ -23,23 +23,23 @@ namespace Tavis
 {
     public class LinkHeaderParser
     {
-        private readonly LinkFactory _linkFactory;
+        private readonly ILinkFactory _linkFactory;
 
 
         public Uri BaseUrl { get; protected set; }
 
-        public LinkHeaderParser(LinkFactory linkFactory)
+        public LinkHeaderParser(ILinkFactory linkFactory)
         {
             _linkFactory = linkFactory;
         }
 
-        public IList<Link> Parse(Uri baseUrl, string linkHeader)
+        public IList<ILink> Parse(Uri baseUrl, string linkHeader)
     {
       BaseUrl = baseUrl;
       InputString = linkHeader;
       InputPos = 0;
 
-      IList<Link> links = new List<Link>();
+      IList<ILink> links = new List<ILink>();
 
       while (true)
       {
@@ -82,7 +82,7 @@ namespace Tavis
 
     #region Parser
 
-    protected Link ParseLink()
+    protected ILink ParseLink()
     {
 //      Condition.Requires(NextToken.Type, "CurrentToken.Type").IsEqualTo(TokenType.Url);
 
@@ -126,7 +126,7 @@ namespace Tavis
         }
       }
 
-        Link link = _linkFactory.CreateLink(rel);
+        ILink link = _linkFactory.CreateLink(rel);
         link.Target = new Uri(BaseUrl, url);
         link.Relation = rel;
         link.Title=  title_s ?? title;

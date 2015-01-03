@@ -4,7 +4,7 @@
     <Configuration Condition="'$(Configuration)'==''" >Release</Configuration>
     <BuildDir>$(BaseDir)\build</BuildDir>
     <PackageDir>$(BuildDir)\Packages</PackageDir>
-    <ProjectFile35>$(BaseDir)\src\UriTemplates\UriTemplates.csproj</ProjectFile35>
+
     <ProjectFilePCL>$(BaseDir)\src\Link\Link.csproj</ProjectFilePCL>
   	<Project>Link</Project>
 	<OutputDir>$(BaseDir)\src\$(Project)\bin\$(Configuration)</OutputDir>

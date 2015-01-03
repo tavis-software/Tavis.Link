@@ -90,7 +90,7 @@ namespace LinkTests
             var responseHandler = link as IResponseHandler;
             if (responseHandler != null)
             {
-                await responseHandler.HandleResponseAsync(response);
+                await responseHandler.HandleResponseAsync(link.LinkRelation, response);
             }
         }
 
@@ -130,11 +130,16 @@ namespace LinkTests
             return new HttpRequestMessage() {RequestUri = Target};    
         }
 
-        public Task<HttpResponseMessage> HandleResponseAsync(HttpResponseMessage responseMessage)
+        public Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
         {
             Assert.Equal(200, (int)responseMessage.StatusCode);
 
             return Task.FromResult(responseMessage);
+        }
+
+        public string LinkRelation
+        {
+            get { return "home"; }
         }
     }
     

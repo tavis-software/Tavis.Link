@@ -78,7 +78,7 @@ namespace LinkTests
             {
                 return base.SendAsync(request, cancellationToken);
             }
-
+            Response.RequestMessage = request;
             return Task.Factory.StartNew(() => Response);
         }
     }
@@ -90,7 +90,7 @@ namespace LinkTests
 
             Target = new Uri("http://localhost/guidservice");
 
-            this.HttpResponseHandler = new ActionResponseHandler(r =>
+            AddResponseHandler(new InlineResponseHandler((lr, r) =>
             {
                 {
                     if (r.StatusCode != HttpStatusCode.OK)
@@ -99,7 +99,7 @@ namespace LinkTests
                     }
                     Guid = r.Content.ReadAsStringAsync().Result;
                 }
-            });
+            }));
         }
 
         public string Guid { get; set; }

@@ -16,6 +16,7 @@ namespace Tavis.OAuth
             Template = new UriTemplate("{authorization_server}{?client_id,scope,response_type,redirect_uri,state}");
         }
         public Uri AuthorizationServer { get; set; }
+
         public HttpRequestMessage CreateRequest(string clientId, string responseType, Uri redirectUri, string[] scope, string state)
         {
             ClientId = clientId;

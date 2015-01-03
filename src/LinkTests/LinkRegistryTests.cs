@@ -38,17 +38,17 @@ namespace LinkTests
 
 
         [Fact]
-        public void SpecifyHandlerForAboutLink()
+        public async Task SpecifyHandlerForAboutLink()
         {
             var foo = false;
 
             var registry = new LinkFactory();
-            registry.SetHandler<AboutLink>(new ActionResponseHandler((hrm) => foo = true));
+            registry.SetHandler<AboutLink>(new InlineResponseHandler((rel,hrm) => foo = true));
 
             var link = registry.CreateLink<AboutLink>();
 
-
-            Assert.IsType<ActionResponseHandler>(link.HttpResponseHandler);
+            await link.HandleResponseAsync(link.Relation, new HttpResponseMessage());
+            Assert.Equal(true, foo);
             
         }
 
@@ -64,9 +64,9 @@ namespace LinkTests
             var baz = false;
   
             var registry = new LinkFactory();
-            var grh = new ActionResponseHandler((hrm) => baz = true,
-                new ActionResponseHandler((hrm) => foo = true, 
-                    new ActionResponseHandler((hrm) => bar = true)));
+            var grh = new InlineResponseHandler((rel,hrm) => baz = true,
+                new InlineResponseHandler((rel, hrm) => foo = true,
+                    new InlineResponseHandler((rel, hrm) => bar = true)));
             
             registry.SetHandler<AboutLink>(grh);
             
