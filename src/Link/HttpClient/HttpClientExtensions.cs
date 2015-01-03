@@ -14,7 +14,9 @@ namespace Tavis
         }
 
 
-        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, IRequestFactory requestFactory, IResponseHandler handler)
+        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, 
+            IRequestFactory requestFactory, 
+            IResponseHandler handler)
         {
 
             var httpRequestMessage = requestFactory.CreateRequest();

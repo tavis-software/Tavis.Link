@@ -5,22 +5,24 @@ namespace Tavis
 {
     public static class TaskExtensions
     {
-        public static Task ApplyRepresentationToAsync(this Task<HttpResponseMessage> task, IResponseHandler responseHandler)
+
+        public static async Task<HttpResponseMessage> ApplyRepresentationToAsync(this Task<HttpResponseMessage> task, IResponseHandler responseHandler)
         {
-            return task.ContinueWith(t =>
+            // What do we do with exceptions that happen here?               
+            
+            HttpResponseMessage response = await task;
+            if (task.IsCompleted && responseHandler != null)
             {
-                if (t.IsCompleted)
+                response = task.Result;
+                string lr = "related";
+                if (response.RequestMessage.Properties.ContainsKey(HttpClientExtensions.PropertyKeyLinkRelation))
                 {
-                    var response = t.Result;
-                    string lr = "related";
-                    if (response.RequestMessage.Properties.ContainsKey(HttpClientExtensions.PropertyKeyLinkRelation))
-                    {
-                        lr = response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] as string;
-                    }
-                    return responseHandler.HandleResponseAsync(lr, response);
+                    lr = response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] as string;
                 }
-                return t;
-            });
+                response = await responseHandler.HandleResponseAsync(lr, response);
+            }
+            return response;
+            
         }
     }
 }

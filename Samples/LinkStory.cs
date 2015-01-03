@@ -58,6 +58,7 @@ namespace LinkTests
             {
                 Target = new Uri("https://api.github.com/")
             };
+            
             await Follow(homeLink);
         }
 
@@ -133,7 +134,6 @@ namespace LinkTests
         public Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
         {
             Assert.Equal(200, (int)responseMessage.StatusCode);
-
             return Task.FromResult(responseMessage);
         }
 
