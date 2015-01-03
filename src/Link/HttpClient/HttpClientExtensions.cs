@@ -8,35 +8,23 @@ namespace Tavis
     {
         public const string PropertyKeyLinkRelation = "tavis.linkrelation";
 
-        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, Link link)
-        {
-            return httpClient.FollowLinkAsync(link as IRequestFactory, link as IResponseHandler);
-        }
 
-
-        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, 
+        public static Task<HttpResponseMessage> FollowLinkAsync(
+            this HttpClient httpClient, 
             IRequestFactory requestFactory, 
-            IResponseHandler handler)
-        {
+            IResponseHandler handler = null) {
+
+            if (handler == null)
+            {
+                handler = requestFactory as IResponseHandler;
+            }
 
             var httpRequestMessage = requestFactory.CreateRequest();
             httpRequestMessage.Properties[PropertyKeyLinkRelation] = requestFactory.LinkRelation;
+
             return httpClient.SendAsync(httpRequestMessage)
-                .ContinueWith(t =>
-                {
-                    if (t.IsCompleted && handler != null)
-                    {
-                        return handler.HandleResponseAsync(requestFactory.LinkRelation, t.Result);
-                    }
-                    return t;
-                }).Unwrap();
+                .ApplyRepresentationToAsync(handler);
         }
 
-        public static Task<HttpResponseMessage> FollowLinkAsync(this HttpClient httpClient, IRequestFactory requestFactory)
-        {
-            var httpRequestMessage = requestFactory.CreateRequest();
-            httpRequestMessage.Properties[PropertyKeyLinkRelation] = requestFactory.LinkRelation;
-            return httpClient.SendAsync(httpRequestMessage);
-        }
     }
 }

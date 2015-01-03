@@ -43,7 +43,7 @@ namespace LinkTests
         }
 
         [Fact]
-        public Task Returns_content_if_response_is_OK()
+        public async Task Returns_content_if_response_is_OK()
         {
             string content = Guid.NewGuid().ToString();
             var response = new HttpResponseMessage(HttpStatusCode.OK);
@@ -56,8 +56,9 @@ namespace LinkTests
             });
 
             var link = new GuidServiceLink();
-            return httpClient.FollowLinkAsync(link).ContinueWith(
-                t => Assert.Equal(content, link.Guid));
+            await httpClient.FollowLinkAsync(link);
+            
+            Assert.Equal(content, link.Guid);
 
 
 
