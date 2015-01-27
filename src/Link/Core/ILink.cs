@@ -22,9 +22,4 @@ namespace Tavis
             void SetLinkExtension(string name, string value);
             IEnumerable<KeyValuePair<string, string>> LinkExtensions { get ; }
     }
-
-    public interface ILinkFactory
-    {
-        ILink CreateLink(string relation);
-    }
 }

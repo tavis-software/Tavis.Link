@@ -62,22 +62,22 @@ namespace LinkTests
             await Follow(homeLink);
         }
 
-        [Fact]
-        public async Task CompareApproaches()
-        {
-            //// Wrapper Service 
-            //var customerService = new CustomerService();
-            //var customer = customerService.GetCustomer(22);
-            //application.Process(customer);
+        //[Fact]
+        //public  Task CompareApproaches()
+        //{
+        //    //// Wrapper Service 
+        //    //var customerService = new CustomerService();
+        //    //var customer = customerService.GetCustomer(22);
+        //    //application.Process(customer);
 
-            //// Hypermedia Centric
-            //var customerLink = linkFactory.Create<CustomerLink>();
-            //customerLink.Id = 22;
-            //application.FollowLink(customerLink);
+        //    //// Hypermedia Centric
+        //    //var customerLink = linkFactory.Create<CustomerLink>();
+        //    //customerLink.Id = 22;
+        //    //application.FollowLink(customerLink);
 
 
 
-        }
+        //}
 
 
         private static async Task Follow(IRequestFactory link)

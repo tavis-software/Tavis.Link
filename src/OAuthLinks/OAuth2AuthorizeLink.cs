@@ -9,7 +9,8 @@ namespace Tavis.OAuth
     [LinkRelationType("oauth2-authorize")]
     public class OAuth2AuthorizeLink : Link
     {
-        public string ClientId;
+       
+        public string ClientId {get;set;}
 
         public OAuth2AuthorizeLink()
         {
