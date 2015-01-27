@@ -3,6 +3,7 @@
 ### 2.0.4
 Updated LinkFactory to work with ILink
 Removed EmbedTarget support
+Added support for default values of Link Parameters
 Added reflection based discovery of Link parameters for filling templates
 Broke the Follow and Apply steps down into separate extension methods.
 Added LinkRelation as parameter to IResponseHandler.  
