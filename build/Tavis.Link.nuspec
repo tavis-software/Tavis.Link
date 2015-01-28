@@ -9,9 +9,9 @@
     <releaseNotes>Added support for WinPhone 8.1</releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
-      	  <dependency id="Tavis.UriTemplates" version="0.5.0-beta1" />
-	  <dependency id="Microsoft.Net.Http" version="2.2.22" />
-	  <dependency id="Newtonsoft.Json" version="6.0.5" />
+     <dependency id="Tavis.UriTemplates" version="0.6.1" />
+	   <dependency id="Microsoft.Net.Http" version="2.2.28" />
+	   <dependency id="Newtonsoft.Json" version="6.0.5" />
 	</dependencies>
   </metadata>
   <files>
