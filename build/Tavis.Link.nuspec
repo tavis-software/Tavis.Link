@@ -6,7 +6,11 @@
     <authors>Darrel Miller</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of a Web Link that conforms to RFC 5988</description>
-    <releaseNotes>Added support for WinPhone 8.1</releaseNotes>
+    <releaseNotes>
+      <![CDATA[
+            For full release notes see https://github.com/tavis-software/Tavis.Link/blob/master/ReleaseNotes.md
+            ]]>
+    </releaseNotes>
     <projectUrl>https://github.com/tavis-software/Link</projectUrl>
  	<dependencies>
      <dependency id="Tavis.UriTemplates" version="0.6.1" />
