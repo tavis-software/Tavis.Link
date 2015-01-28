@@ -25,7 +25,7 @@
   <Target Name="Package">
 
     <Exec WorkingDirectory="$(BuildDir)"
-          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec" />
+          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec -OutputDirectory $(ArtifactsDir)" />
     <!--<Exec WorkingDirectory="$(BuildDir)"
           Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).OAuth.nuspec" />
     <Exec WorkingDirectory="$(BuildDir)"
