@@ -2,12 +2,13 @@
   <PropertyGroup>
     <BaseDir>$(MSBuildProjectDirectory)\..</BaseDir>
     <Configuration Condition="'$(Configuration)'==''" >Release</Configuration>
+    <ArtifactsDir>$(BaseDir)\artifacts</ArtifactsDir>
     <BuildDir>$(BaseDir)\build</BuildDir>
     <PackageDir>$(BuildDir)\Packages</PackageDir>
 
     <ProjectFilePCL>$(BaseDir)\src\Link\Link.csproj</ProjectFilePCL>
   	<Project>Link</Project>
-	<OutputDir>$(BaseDir)\src\$(Project)\bin\$(Configuration)</OutputDir>
+  	<OutputDir>$(BaseDir)\src\$(Project)\bin\$(Configuration)</OutputDir>
 	<SolutionDir>$(BaseDir)</SolutionDir>  <!-- Needed or import of nuget targets in csproj file fails-->
   </PropertyGroup>
 
@@ -25,10 +26,10 @@
 
     <Exec WorkingDirectory="$(BuildDir)"
           Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec" />
+    <!--<Exec WorkingDirectory="$(BuildDir)"
+          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).OAuth.nuspec" />
     <Exec WorkingDirectory="$(BuildDir)"
-          Command="nuget.exe pack $(BuildDir)\Tavis.Link.OAuth.nuspec" />
-    <Exec WorkingDirectory="$(BuildDir)"
-          Command="nuget.exe pack $(BuildDir)\Tavis.Link.Search.nuspec" />
+          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).Search.nuspec" />-->
 
   </Target>
 </Project>
