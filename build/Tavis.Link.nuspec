@@ -15,6 +15,6 @@
 	</dependencies>
   </metadata>
   <files>
-    <file src="..\src\Link\bin\Release\Tavis.Link.dll" target="lib\portable-net45+sl5+wp8+win8+wpa81+MonoTouch1+MonoAndroid1\" />
+    <file src="..\artifacts\link\lib\**\Tavis.Link.dll" target="lib" />
   </files>
 </package>

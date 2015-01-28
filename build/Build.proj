@@ -16,7 +16,7 @@
   <Target Name="default" DependsOnTargets="Compile; Package" />
 
   <Target Name="Compile">
-	<MSBuild Projects="$(ProjectFilePCL)" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
+	<MSBuild Projects="$(ProjectFilePCL)" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir);OutputPath=$(ArtifactsDir)\Link\lib\portable-net45+sl5+wp8+win8+wpa81+MonoTouch1+MonoAndroid1"  />
 	<MSBuild Projects="$(BaseDir)\src\OAuthLinks\OAuthLinks.csproj" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
 	<MSBuild Projects="$(BaseDir)\src\SearchLink\SearchLink.csproj" Properties="Configuration=$(Configuration);SolutionDir=$(SolutionDir)"  />
 
@@ -25,7 +25,7 @@
   <Target Name="Package">
 
     <Exec WorkingDirectory="$(BuildDir)"
-          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec -OutputDirectory $(ArtifactsDir)" />
+          Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).nuspec -OutputDirectory $(ArtifactsDir) " />
     <!--<Exec WorkingDirectory="$(BuildDir)"
           Command="nuget.exe pack $(BuildDir)\Tavis.$(Project).OAuth.nuspec" />
     <Exec WorkingDirectory="$(BuildDir)"
