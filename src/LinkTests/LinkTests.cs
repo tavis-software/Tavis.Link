@@ -92,6 +92,22 @@ namespace LinkTests
         }
 
 
+        
+        [Fact]
+        public void RelativeLinkTemplate()
+        {
+            var link = new Link { Template = new UriTemplate("/foo/{bar}") };
+
+            link.Template.AddParameter("bar", "baz");
+
+            var req = link.CreateRequest();
+
+            Assert.Equal("/foo/baz", req.RequestUri.OriginalString);
+            
+        }
+
+
+
         [Fact]
         public async Task FollowLink()
         {

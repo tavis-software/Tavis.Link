@@ -35,7 +35,7 @@ namespace Tavis
                             link.Template.AddParameter(prop.Key, value);
                         }
                     }
-                    link.Target = new Uri(link.Template.Resolve());
+                    link.Target = new Uri(link.Template.Resolve(), UriKind.RelativeOrAbsolute);
                 }
 
                 request.Method = link.Method;

@@ -15,6 +15,8 @@ namespace LinkTests
     {
 
 
+
+
         [Fact]
         public void ResolveBingMapLinkUsingCreate()
         {
