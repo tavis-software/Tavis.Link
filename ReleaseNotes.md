@@ -13,6 +13,7 @@
 - Introduced IResponseHandler, IRequestFactory and ILink interface to remove need for deriving from Link.
 - Renamed RfcLink to LinkAttributes
 - Created a seperate property for Template. This makes it easier to re-use links for different sets of parameters as the template is not lost when Target is resolved.
+- Removed dependency on Nuget based HttpClient
 
 
 ### 2.0.0 - Never released

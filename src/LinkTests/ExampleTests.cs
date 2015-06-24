@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime;
 using System.Text;
+using Newtonsoft.Json;
 using Tavis;
 using Tavis.IANA;
 using Tavis.UriTemplates;
@@ -196,9 +197,21 @@ namespace LinkTests
 
             Assert.Equal(HttpMethod.Post, request.Method);
         }
+
+
+        [Fact]
+        public void DeserializeTest()
         
+        {
+  //          var p = typeof(ConfigurationManager);
 
 
+//            var z = Activator.CreateInstance(Type.GetType("System.Net.Http.HttpClient, System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+
+            var x = JsonConvert.DeserializeObject("{ '$type': 'System.Net.Http.HttpClient, System.Net.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'}", new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+            var y = new UTF8Encoding();
+            Assert.NotNull(x);
+        }
     
     }
 }

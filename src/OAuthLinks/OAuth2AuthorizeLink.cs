@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using LinkTests;
 using Tavis.UriTemplates;
 
 namespace Tavis.OAuth

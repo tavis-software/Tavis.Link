@@ -56,7 +56,7 @@ namespace Tavis
                 return info.Attribute.Default;
             }
 
-            if (info.PropertyInfo.PropertyType.IsValueType)
+            if (info.PropertyInfo.PropertyType.GetTypeInfo().IsValueType)
             {
                 return Activator.CreateInstance(info.PropertyInfo.PropertyType);
             }
@@ -66,21 +66,17 @@ namespace Tavis
         private static Dictionary<string, ParameterInfo> GetBindingProperties(Link link)
         {
             var props = link.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .GetTypeInfo()
+                .DeclaredProperties 
                 .Select(p => new ParameterInfo()
                 {
                     PropertyInfo = p,
-                    Attribute = p.GetCustomAttributes(typeof (LinkParameterAttribute), true)
-                            .Cast<LinkParameterAttribute>()
-                            .FirstOrDefault()
+                    Attribute =  p.GetCustomAttributes<LinkParameterAttribute>()
+                    .FirstOrDefault()
                 })
                 .ToDictionary(pi =>
                 {
-                    if (pi.Attribute == null)
-                    {
-                        return pi.PropertyInfo.Name.ToLowerInvariant();
-                    }
-                    return pi.Attribute.Name;
+                    return pi.Attribute == null ? pi.PropertyInfo.Name.ToLowerInvariant() : pi.Attribute.Name;
                 }, pr => pr);
             return props;
         }

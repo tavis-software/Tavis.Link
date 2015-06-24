@@ -4,8 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using Tavis.UriTemplates;
+using System.Reflection;
 
-namespace LinkTests
+namespace Tavis
 {
     public static class UriExtensions
     {
@@ -14,7 +15,7 @@ namespace LinkTests
         public static Dictionary<string, object> ObjectToDictionary<T>(T dto)
         {
             Type t = typeof (T);
-            var properties = t.GetProperties();
+            var properties = t.GetRuntimeProperties();
             var dictionary = properties.ToDictionary(info => info.Name,
                 info => info.GetValue(dto, null));
             return dictionary;

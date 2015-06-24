@@ -43,7 +43,7 @@ namespace LinkTests
             };
             
             var uri = new Uri("http://example.org/blah");
-            var uri2 = uri.MakeTemplate(UriExtensions.ObjectToDictionary(foo));
+            var uri2 = uri.MakeTemplate(Tavis.UriExtensions.ObjectToDictionary(foo));
 
             Assert.Equal("http://example.org/blah?Bar=hello%20world&Baz=10", uri2.Resolve());
         }
