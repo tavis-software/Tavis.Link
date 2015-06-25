@@ -38,12 +38,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ActionResponseHandler.cs" />
-    <Compile Include="GithubDocument.cs" />
+    <Compile Include="Links\EventsLink.cs" />
+    <Compile Include="Links\FeedsLink.cs" />
+    <Compile Include="Links\FollowersLink.cs" />
+    <Compile Include="Links\FollowingLink.cs" />
+    <Compile Include="Links\GistsLink.cs" />
+    <Compile Include="Links\EmailsLink.cs" />
+    <Compile Include="Links\EmojisLink.cs" />
+    <Compile Include="Links\AuthorizationsLink.cs" />
+    <Compile Include="Links\CodeSearchLink.cs" />
+    <Compile Include="Links\CurrentUserLink.cs" />
+    <Compile Include="Messages\GithubDocument.cs" />
     <Compile Include="GitHubHelper.cs" />
-    <Compile Include="GithubLinks.cs" />
+    <Compile Include="Links\HomeLink.cs" />
+    <Compile Include="Links\GitHubLink.cs" />
+    <Compile Include="Links\AvatarLink.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Links\UserLink.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

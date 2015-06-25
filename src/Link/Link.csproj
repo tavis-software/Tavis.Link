@@ -78,6 +78,7 @@
     <Compile Include="LinkHelper.cs" />
     <Compile Include="LinkRelationTypeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResponseHandlers\HttpResponseMachine.cs" />
     <Compile Include="StringBuilderExtensions.cs" />
     <Compile Include="UriExtensions.cs" />
   </ItemGroup>

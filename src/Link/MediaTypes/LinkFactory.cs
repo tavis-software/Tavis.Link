@@ -119,18 +119,7 @@ namespace Tavis
             _LinkRegistry.Add(t.Relation, new LinkRegistration() {LinkType =typeof(T) } ); 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="handler"></param>
-        public void SetHandler<T>(DelegatingResponseHandler handler) where T : ILink, new()
-        {
-            var t = new T();
-            var reg = _LinkRegistry[t.Relation];
-            reg.ResponseHandler = handler;
-        }
-
+  
 
         public void SetRequestBuilder<T>(IEnumerable<DelegatingRequestBuilder> builders) where T : ILink, new()
         {
@@ -174,11 +163,6 @@ namespace Tavis
             }
             var reg = _LinkRegistry[relation];
             var t = Activator.CreateInstance(reg.LinkType) as ILink;
-            var link = t as Link;
-            if (link != null)
-            {
-                link.AddResponseHandler(reg.ResponseHandler);
-            }
             return t;
 
         }
@@ -195,7 +179,6 @@ namespace Tavis
             var link = t as Link;
             if (link != null)
             {
-                link.AddResponseHandler(reg.ResponseHandler);
                 if (reg.RequestBuilder != null) link.AddRequestBuilder(reg.RequestBuilder);
             }
 
@@ -214,7 +197,6 @@ namespace Tavis
     public class LinkRegistration
     {
         public Type LinkType { get; set; }
-        public DelegatingResponseHandler ResponseHandler { get; set; }
         public DelegatingRequestBuilder RequestBuilder { get; set; }
     }
 }

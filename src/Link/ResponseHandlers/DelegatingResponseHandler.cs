@@ -6,7 +6,7 @@ namespace Tavis
     /// <summary>
     /// HttpResponseHandler that can be chained into a response pipeline
     /// </summary>
-    public abstract class DelegatingResponseHandler 
+    public abstract class DelegatingResponseHandler : IResponseHandler
     {
         public DelegatingResponseHandler InnerResponseHandler { get; set; }
 

@@ -35,8 +35,10 @@ namespace LinkTests
                 Response = response,
                 InnerHandler = new HttpClientHandler()
             });
+              var machine = new HttpResponseMachine();
+              machine.AddResponseHandler(HttpStatusCode.BadRequest, new InlineResponseHandler((l, r) => { throw new Exception(); })); 
 
-            var task = httpClient.FollowLinkAsync(new GuidServiceLink());
+            var task = httpClient.FollowLinkAsync(new GuidServiceLink(),machine);
             
             Assert.Throws<AggregateException>(() => task.Wait());
             
@@ -56,9 +58,20 @@ namespace LinkTests
             });
 
             var link = new GuidServiceLink();
-            await httpClient.FollowLinkAsync(link);
+            Guid guid = Guid.Empty;
+            var machine = new HttpResponseMachine();
+            machine.AddResponseHandler(HttpStatusCode.OK, new InlineResponseHandler((lr, r) =>
+            {
+                {
+                    
+                    guid = Guid.Parse( r.Content.ReadAsStringAsync().Result);
+                }
+            }));
+
+
+            await httpClient.FollowLinkAsync(link,machine);
             
-            Assert.Equal(content, link.Guid);
+            Assert.Equal(content, guid.ToString());
 
 
 
@@ -91,16 +104,6 @@ namespace LinkTests
 
             Target = new Uri("http://localhost/guidservice");
 
-            AddResponseHandler(new InlineResponseHandler((lr, r) =>
-            {
-                {
-                    if (r.StatusCode != HttpStatusCode.OK)
-                    {
-                        throw new Exception("Invalid response");
-                    }
-                    Guid = r.Content.ReadAsStringAsync().Result;
-                }
-            }));
         }
 
         public string Guid { get; set; }

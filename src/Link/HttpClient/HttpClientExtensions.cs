@@ -14,11 +14,6 @@ namespace Tavis
             IRequestFactory requestFactory, 
             IResponseHandler handler = null) {
 
-            if (handler == null)
-            {
-                handler = requestFactory as IResponseHandler;
-            }
-
             var httpRequestMessage = requestFactory.CreateRequest();
             httpRequestMessage.Properties[PropertyKeyLinkRelation] = requestFactory.LinkRelation;
 

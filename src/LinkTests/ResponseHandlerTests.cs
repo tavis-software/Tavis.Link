@@ -18,11 +18,12 @@ namespace LinkTests
             var link = new Link(){Target = new Uri("http://localhost")};
 
             var notFoundHandler = new NotFoundHandler(new OkHandler(null));
-            link.AddResponseHandler(notFoundHandler);
+            var machine = new HttpResponseMachine();
+            machine.AddResponseHandler(HttpStatusCode.NotFound, notFoundHandler);
 
             var client = new HttpClient(new FakeHandler() {Response = new HttpResponseMessage() {StatusCode = HttpStatusCode.NotFound}});
 
-            await client.FollowLinkAsync(link);
+            await client.FollowLinkAsync(link,machine);
 
             Assert.True(notFoundHandler.NotFound);
         }
@@ -44,6 +45,26 @@ namespace LinkTests
 
             Assert.Equal(HttpStatusCode.NotFound, clientState.StatusCode);
         }
+
+
+        [Fact]
+        public async Task TestUsingMachine()
+        {
+            var link = new Link() { Target = new Uri("http://localhost") };
+
+            var responseMachine = new HttpResponseMachine();
+            
+            var notFoundHandler = new NotFoundHandler(new OkHandler(null));
+            responseMachine.AddResponseHandler(HttpStatusCode.NotFound, notFoundHandler);
+
+
+            var client = new HttpClient(new FakeHandler() { Response = new HttpResponseMessage() { StatusCode = HttpStatusCode.NotFound } });
+
+            await client.FollowLinkAsync(link,responseMachine);
+
+            Assert.True(notFoundHandler.NotFound);
+        }
+
     }
     public class ClientApplicationState : IResponseHandler
     {

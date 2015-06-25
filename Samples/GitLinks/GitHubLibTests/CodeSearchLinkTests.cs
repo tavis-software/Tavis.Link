@@ -116,6 +116,25 @@ namespace GitHubLibTests
             Assert.NotNull(clientState.SearchResult);
         }
 
+
+        // Handle response in HttpMachine
+        [Fact]
+        public async Task HandleCodeSearchResponseInMachine()
+        {
+            var response = new HttpResponseMessage();
+            var clientState = new ClientState();
+            response.RequestMessage = new HttpRequestMessage();
+            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] = "codesearch";
+            response.Content = new StringContent("Fake content");
+            var task = Task.FromResult<HttpResponseMessage>(response);
+            CodeSearchLink.CodeSearchResults result = null;
+
+            var httpMachine = new HttpResponseMachine();
+            httpMachine.AddResponseHandler(System.Net.HttpStatusCode.OK, clientState);
+            await task.ApplyRepresentationToAsync(httpMachine);
+
+            Assert.NotNull(clientState.SearchResult);
+        }
         // Handle response in link class
         // See above example!
 

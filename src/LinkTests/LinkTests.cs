@@ -115,8 +115,9 @@ namespace LinkTests
             var client = new HttpClient(new FakeMessageHandler());
 
             var uri = string.Empty;
-            link.AddResponseHandler(new InlineResponseHandler((rel,r) => uri = r.RequestMessage.RequestUri.AbsoluteUri));
-            await client.FollowLinkAsync(link);
+            var machine = new HttpResponseMachine();
+            machine.AddResponseHandler(HttpStatusCode.OK,new InlineResponseHandler((rel,r) => uri = r.RequestMessage.RequestUri.AbsoluteUri));
+            await client.FollowLinkAsync(link,machine);
 
             
 
