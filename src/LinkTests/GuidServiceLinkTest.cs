@@ -36,7 +36,7 @@ namespace LinkTests
                 InnerHandler = new HttpClientHandler()
             });
               var machine = new HttpResponseMachine();
-              machine.AddResponseHandler(HttpStatusCode.BadRequest, new InlineResponseHandler((l, r) => { throw new Exception(); })); 
+              machine.AddResponseHandler((l, r) => { throw new Exception(); }, HttpStatusCode.BadRequest); 
 
             var task = httpClient.FollowLinkAsync(new GuidServiceLink(),machine);
             
@@ -60,13 +60,14 @@ namespace LinkTests
             var link = new GuidServiceLink();
             Guid guid = Guid.Empty;
             var machine = new HttpResponseMachine();
-            machine.AddResponseHandler(HttpStatusCode.OK, new InlineResponseHandler((lr, r) =>
+            machine.AddResponseHandler(async (lr, r) =>
             {
                 {
                     
                     guid = Guid.Parse( r.Content.ReadAsStringAsync().Result);
+                    return r;
                 }
-            }));
+            }, HttpStatusCode.OK);
 
 
             await httpClient.FollowLinkAsync(link,machine);

@@ -3,35 +3,72 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Tavis
 {
-    public class HttpResponseMachine : IResponseHandler
+   
+
+    public class HttpResponseMachine : HttpResponseMachine<object>
     {
-        private readonly Dictionary<HttpStatusCode, IResponseHandler> _ResponseHandlers = new Dictionary<HttpStatusCode, IResponseHandler>();
-
         public HttpResponseMachine()
+            : base(null)
         {
-            // Default No-op handlers
-            _ResponseHandlers[HttpStatusCode.Continue] = new InlineResponseHandler((s, r) => { });
-            _ResponseHandlers[HttpStatusCode.OK] = new InlineResponseHandler((s, r) => { });
-            _ResponseHandlers[HttpStatusCode.MultipleChoices] = new InlineResponseHandler((s, r) => { });
-            _ResponseHandlers[HttpStatusCode.BadRequest] = new InlineResponseHandler((s, r) => { });
-            _ResponseHandlers[HttpStatusCode.InternalServerError] = new InlineResponseHandler((s, r) => { });
+        }
 
+        public void AddResponseHandler(Func<string, HttpResponseMessage, Task<HttpResponseMessage>> responseHandler, HttpStatusCode statusCode, string linkRelation = null, MediaTypeHeaderValue contentType = null, Uri profile = null)
+        {
+            this.AddResponseHandler((m, l, r) => responseHandler(l, r), statusCode, linkRelation: linkRelation, contentType: contentType, profile: profile);
+        }
+
+    }
+
+    public class HttpResponseMachine<T> : IResponseHandler
+    {
+        private readonly T _Model;
+        private readonly List<HandlerKey> _ResponseHandlers = new List<HandlerKey>();
+
+        public delegate Task<HttpResponseMessage> ResponseHandler<T>(T clientstate, string linkRelation, HttpResponseMessage response);
+
+        public HttpResponseMachine(T model)
+        {
+            _Model = model;
         }
 
         public async Task<HttpResponseMessage> HandleResponseAsync(string linkrelation, HttpResponseMessage response)
         {
-            var statusCode = response.StatusCode;
-            if (!_ResponseHandlers.ContainsKey(statusCode))
+            var handlerKey = new HandlerKey(response, linkrelation);
+
+            var handlerResult = FindHandler(response, handlerKey);
+
+            return await handlerResult.ResponseHandler(_Model, linkrelation, response);
+        }
+
+        private HandlerResult FindHandler(HttpResponseMessage response, HandlerKey responseHandlerKey)
+        {
+            var statusHandlers = _ResponseHandlers.Where(h => h.StatusCode == responseHandlerKey.StatusCode);
+            if (!statusHandlers.Any())
             {
-                statusCode = GetDefaultStatusCode(response.StatusCode);
+                responseHandlerKey.StatusCode = GetDefaultStatusCode(response.StatusCode);
             }
 
-            return await _ResponseHandlers[statusCode].HandleResponseAsync(linkrelation, response);
+
+            var handlerResults = statusHandlers.Where(h => h.StatusCode == responseHandlerKey.StatusCode
+                                                           && (h.ContentType == null ||
+                                                            h.ContentType.Equals(responseHandlerKey.ContentType))
+                                                           && (h.Profile == null || h.Profile == responseHandlerKey.Profile)
+                                                           && (String.IsNullOrEmpty(h.LinkRelation) ||
+                                                            h.LinkRelation == responseHandlerKey.LinkRelation))
+                .Select(h => new HandlerResult()
+                {
+                    ResponseHandler = h.ResponseHandler,
+                    Score = (h.ContentType != null ? 8 : 0) + (h.LinkRelation != null ? 2 : 0) + (h.Profile != null ? 2 : 0)
+                });
+
+            var handler = handlerResults.OrderByDescending(h => h.Score).First();
+            return handler;
         }
 
         private HttpStatusCode GetDefaultStatusCode(HttpStatusCode httpStatusCode)
@@ -58,9 +95,57 @@ namespace Tavis
             }
         }
 
-        public void AddResponseHandler(HttpStatusCode statusCode, IResponseHandler responseHandler)
+
+        public void AddResponseHandler(ResponseHandler<T> responseHandler, HttpStatusCode statusCode, string linkRelation = null, MediaTypeHeaderValue contentType = null, Uri profile = null)
         {
-            _ResponseHandlers[statusCode] = responseHandler;
+            var key = new HandlerKey()
+            {
+                StatusCode = statusCode,
+                ContentType = contentType,
+                Profile = profile,
+                LinkRelation = linkRelation,
+                ResponseHandler = responseHandler
+            };
+            _ResponseHandlers.Add(key);
         }
+
+
+        private class HandlerKey
+        {
+            public HandlerKey()
+            {
+
+            }
+
+            public HandlerKey(HttpResponseMessage response, string linkRelation)
+            {
+                StatusCode = response.StatusCode;
+                if (response.Content != null)
+                {
+                    ContentType = response.Content.Headers.ContentType;
+                    // Hunt for profile (m/t Parameters, Link Header)
+                }
+                LinkRelation = linkRelation;
+            }
+            public HttpStatusCode StatusCode { get; set; }
+            public MediaTypeHeaderValue ContentType { get; set; }
+            public Uri Profile { get; set; }
+            public string LinkRelation { get; set; }
+            public ResponseHandler<T> ResponseHandler { get; set; }
+
+        }
+
+        private class HandlerResult
+        {
+            public int Score { get; set; }
+            public ResponseHandler<T> ResponseHandler { get; set; }
+        }
+
+
+    }
+
+    public class Model<T>
+    {
+        public T Value { get; set; }
     }
 }

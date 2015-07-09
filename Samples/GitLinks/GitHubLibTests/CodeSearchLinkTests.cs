@@ -130,7 +130,7 @@ namespace GitHubLibTests
             CodeSearchLink.CodeSearchResults result = null;
 
             var httpMachine = new HttpResponseMachine();
-            httpMachine.AddResponseHandler(System.Net.HttpStatusCode.OK, clientState);
+            httpMachine.AddResponseHandler(clientState.HandleResponseAsync, System.Net.HttpStatusCode.OK);
             await task.ApplyRepresentationToAsync(httpMachine);
 
             Assert.NotNull(clientState.SearchResult);

@@ -55,7 +55,7 @@ namespace LinkTests
                     new InlineResponseHandler((rel, hrm) => bar = true)));
 
             var machine = new HttpResponseMachine();
-            machine.AddResponseHandler(System.Net.HttpStatusCode.OK, grh);
+            machine.AddResponseHandler(grh.HandleResponseAsync, System.Net.HttpStatusCode.OK);
             
 
             var link = registry.CreateLink<AboutLink>();

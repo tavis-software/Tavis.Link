@@ -15,6 +15,7 @@
 - Created a seperate property for Template. This makes it easier to re-use links for different sets of parameters as the template is not lost when Target is resolved.
 - Removed dependency on Nuget based HttpClient
 - Removed IResponseHandler from the Link class.  Its only role is now as a request factory
+- Introduced HttpResponseMachine and HttpResponseMachine<T>  (profile matching not working yet)
 
 ### 2.0.0 - Never released
 - Implemented a ResponseHandler infrastructure to allow Links to process responses
