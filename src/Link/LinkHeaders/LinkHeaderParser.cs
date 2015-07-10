@@ -91,6 +91,7 @@ namespace Tavis
       string title = null;
       string title_s = null;
       string type = null;
+      List<KeyValuePair<string, string>> extensions = new List<KeyValuePair<string,string>>();
 
       GetNextToken();
 
@@ -110,6 +111,8 @@ namespace Tavis
             title_s = p.Value;
           else if (p.Key == "type" && type == null)
             type = p.Value;
+          else
+            extensions.Add(p);
         }
         catch (FormatException)
         {
@@ -130,6 +133,9 @@ namespace Tavis
         link.Target = new Uri(BaseUrl, url);
         link.Relation = rel;
         link.Title=  title_s ?? title;
+
+        foreach (var extension in extensions)
+          link.SetLinkExtension(extension.Key, extension.Value);
     
         if (!String.IsNullOrEmpty(type)) link.Type = type;
       return link;
