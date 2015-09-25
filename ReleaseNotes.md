@@ -1,7 +1,7 @@
 # Release Notes
 
 
-### 2.0.4  (Warning: There are breaking changes in this version)
+### 2.1.0  (Warning: There are breaking changes in this version, but 2 was never released)
 - Updated LinkFactory to work with ILink
 - Removed EmbedTarget support
 - Added support for default values of Link Parameters
