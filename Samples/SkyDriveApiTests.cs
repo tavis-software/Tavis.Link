@@ -23,12 +23,12 @@ namespace Samples
                 Target = new Uri("https://login.live.com/oauth20_authorize.srf")
             };
 
-            var req = authLink.CreateRequest(
-                clientId: "...",
-                responseType: "code",
-                redirectUri: new Uri("https://login.live.com/oauth20_desktop.srf"),
-                scope : new[] { "wl.signin", "wl.basic", "wl.skydrive_update" },
-                state : null);
+            //var req = authLink.CreateRequest(
+            //    clientId: "...",
+            //    responseType: "code",
+            //    redirectUri: new Uri("https://login.live.com/oauth20_desktop.srf"),
+            //    scope : new[] { "wl.signin", "wl.basic", "wl.skydrive_update" },
+            //    state : null);
             
             // Copy this URI into the browser, sign in, and then copy the auth code from URL in the browser
         }
