@@ -12,6 +12,8 @@ using Newtonsoft.Json.Linq;
 using Tavis;
 using Tavis.UriTemplates;
 using Xunit;
+using Tavis.HttpResponseMachine;
+using Tavis.Http;
 
 namespace LinkTests
 {
@@ -116,7 +118,8 @@ namespace LinkTests
 
             var uri = string.Empty;
             var machine = new HttpResponseMachine();
-            machine.AddResponseHandler(async (rel,r) => {uri = r.RequestMessage.RequestUri.AbsoluteUri; return r;}, HttpStatusCode.OK);
+            machine.When(HttpStatusCode.OK)
+                .Then(async(rel,r) => { uri = r.RequestMessage.RequestUri.AbsoluteUri; });
             await client.FollowLinkAsync(link,machine);
 
             Assert.Equal("http://localhost/", uri);

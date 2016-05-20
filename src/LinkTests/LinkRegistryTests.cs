@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tavis;
+using Tavis.Http;
+using Tavis.HttpResponseMachine;
 using Tavis.IANA;
 using Xunit;
 
@@ -36,12 +38,6 @@ namespace LinkTests
 
        
 
-
-   
-       
-
-  
-
         [Fact]
         public Task SpecifyHandlerChainForAboutLink()
         {
@@ -55,7 +51,8 @@ namespace LinkTests
                     new InlineResponseHandler((rel, hrm) => bar = true)));
 
             var machine = new HttpResponseMachine();
-            machine.AddResponseHandler(grh.HandleResponseAsync, System.Net.HttpStatusCode.OK);
+            machine.When(System.Net.HttpStatusCode.OK)
+                .Then(grh.HandleResponseAsync);
             
 
             var link = registry.CreateLink<AboutLink>();

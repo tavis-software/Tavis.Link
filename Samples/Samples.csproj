@@ -48,6 +48,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tavis.Http, Version=0.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Tavis.Http.0.9.0\lib\portable-net45+netcore45+wpa81\Tavis.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Tavis.UriTemplates, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Tavis.UriTemplates.1.0.0\lib\Net45\Tavis.UriTemplates.dll</HintPath>
       <Private>True</Private>

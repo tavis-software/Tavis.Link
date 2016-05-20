@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Tavis;
+using Tavis.Http;
 using Tavis.RequestBuilders;
 using Tavis.UriTemplates;
 using Xunit;

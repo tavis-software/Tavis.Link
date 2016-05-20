@@ -53,20 +53,14 @@
   <ItemGroup>
     <Compile Include="Core\ILink.cs" />
     <Compile Include="Core\ILinkFactory.cs" />
-    <Compile Include="Core\IRequestFactory.cs" />
-    <Compile Include="Core\IResponseHandler.cs" />
-    <Compile Include="HttpClient\TaskExtensions.cs" />
     <Compile Include="LinkAttributes.cs" />
     <Compile Include="MediaTypes\ILinkFactoryExtensions.cs" />
     <Compile Include="RequestBuilders\InlineRequestBuilder.cs" />
     <Compile Include="RequestBuilders\LinkParameterAttribute.cs" />
-    <Compile Include="ResponseHandlers\InlineResponseHandler.cs" />
     <Compile Include="RequestBuilders\DefaultRequestBuilder.cs" />
     <Compile Include="RequestBuilders\DelegatingRequestBuilder.cs" />
     <Compile Include="Hints\Hint.cs" />
     <Compile Include="Hints\HintFactory.cs" />
-    <Compile Include="HttpClient\HttpClientExtensions.cs" />
-    <Compile Include="ResponseHandlers\DelegatingResponseHandler.cs" />
     <Compile Include="LinkHeaders\HttpHeaderExtensions.cs" />
     <Compile Include="IANA\Hints.cs" />
     <Compile Include="IANA\Links.cs" />
@@ -78,7 +72,6 @@
     <Compile Include="LinkHelper.cs" />
     <Compile Include="LinkRelationTypeAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResponseHandlers\HttpResponseMachine.cs" />
     <Compile Include="StringBuilderExtensions.cs" />
     <Compile Include="UriExtensions.cs" />
   </ItemGroup>
@@ -89,6 +82,10 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net45+wp80+win8+wpa81+aspnetcore50\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Tavis.Http, Version=0.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Tavis.Http.0.9.0\lib\portable-net45+netcore45+wpa81\Tavis.Http.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Tavis.UriTemplates, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Tavis.UriTemplates.1.0.0\lib\portable-net45+netcore45+wpa81+wp8\Tavis.UriTemplates.dll</HintPath>

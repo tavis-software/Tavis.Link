@@ -8,7 +8,8 @@ using GitHubLib;
 using Tavis;
 using Tavis.UriTemplates;
 using Xunit;
-
+using Tavis.Http;
+using Tavis.HttpResponseMachine;
 
 namespace GitHubLibTests
 {
@@ -77,7 +78,7 @@ namespace GitHubLibTests
         public async Task HandleCodeSearchResponseInLine()
         {
             var response = new HttpResponseMessage {RequestMessage = new HttpRequestMessage()};
-            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] = "codesearch";
+            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyRequestFactory] = new Link() { Relation = "codesearch" };
             response.Content = new StringContent("fake response");
             var task = Task.FromResult<HttpResponseMessage>(response);
             HttpContent result = null;
@@ -85,7 +86,7 @@ namespace GitHubLibTests
             await task.ApplyRepresentationToAsync(
                 new InlineResponseHandler(async (linkRelation,responseMessage)=>
                 {
-                     switch (linkRelation)
+                     switch (linkRelation.LinkRelation)
                     {
                         case "codesearch":
                             result = responseMessage.Content;
@@ -105,7 +106,7 @@ namespace GitHubLibTests
             var response = new HttpResponseMessage();
             var clientState = new ClientState();
             response.RequestMessage = new HttpRequestMessage();
-            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] = "codesearch";
+            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyRequestFactory] = new Link() { Relation = "codesearch" };
             response.Content = new StringContent("Fake content");
             var task = Task.FromResult<HttpResponseMessage>(response);
             CodeSearchLink.CodeSearchResults result = null;
@@ -124,13 +125,13 @@ namespace GitHubLibTests
             var response = new HttpResponseMessage();
             var clientState = new ClientState();
             response.RequestMessage = new HttpRequestMessage();
-            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyLinkRelation] = "codesearch";
+            response.RequestMessage.Properties[HttpClientExtensions.PropertyKeyRequestFactory] = new Link { Relation = "codesearch" };
             response.Content = new StringContent("Fake content");
             var task = Task.FromResult<HttpResponseMessage>(response);
             CodeSearchLink.CodeSearchResults result = null;
 
             var httpMachine = new HttpResponseMachine();
-            httpMachine.AddResponseHandler(clientState.HandleResponseAsync, System.Net.HttpStatusCode.OK);
+            httpMachine.When(System.Net.HttpStatusCode.OK).Then(clientState.HandleResponseAsync);
             await task.ApplyRepresentationToAsync(httpMachine);
 
             Assert.NotNull(clientState.SearchResult);
@@ -145,9 +146,9 @@ namespace GitHubLibTests
         LinkFactory _linkFactory;
         public HttpContent SearchResult;
 
-        public async Task<HttpResponseMessage> HandleResponseAsync(string linkRelation, HttpResponseMessage responseMessage)
+        public async Task<HttpResponseMessage> HandleResponseAsync(IRequestFactory link, HttpResponseMessage responseMessage)
         {
-            switch (linkRelation)
+            switch (link.LinkRelation)
             {
                 case "codesearch":
                     SearchResult = responseMessage.Content;

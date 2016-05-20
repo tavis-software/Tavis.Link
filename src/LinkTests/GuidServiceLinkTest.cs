@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tavis;
+using Tavis.Http;
+using Tavis.HttpResponseMachine;
 using Xunit;
 
 namespace LinkTests
@@ -36,7 +38,7 @@ namespace LinkTests
                 InnerHandler = new HttpClientHandler()
             });
               var machine = new HttpResponseMachine();
-              machine.AddResponseHandler((l, r) => { throw new Exception(); }, HttpStatusCode.BadRequest); 
+              machine.When(HttpStatusCode.BadRequest).Then((l, r) => { throw new Exception(); }); 
 
             var task = httpClient.FollowLinkAsync(new GuidServiceLink(),machine);
             
@@ -60,14 +62,14 @@ namespace LinkTests
             var link = new GuidServiceLink();
             Guid guid = Guid.Empty;
             var machine = new HttpResponseMachine();
-            machine.AddResponseHandler(async (lr, r) =>
+            machine
+                .When(HttpStatusCode.OK)
+                .Then(async (lr, r) =>
             {
                 {
-                    
                     guid = Guid.Parse( r.Content.ReadAsStringAsync().Result);
-                    return r;
                 }
-            }, HttpStatusCode.OK);
+            });
 
 
             await httpClient.FollowLinkAsync(link,machine);

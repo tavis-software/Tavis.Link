@@ -1,5 +1,11 @@
 # Release Notes
-
+### 3.0
+- Major refactor
+- HttpResponseMachine has been moved out into it's own package
+- IResponseHandler now expects an IRequestFactory instead of LinkRelation string.  This is so ResponseHandlers can call CreateRequest to re-issue requests.  Beware of mutable RequestFactories when re-using them in multi-threaded scenarios.
+- Core interfaces have been refactored out into Tavis.Http
+### 2.5
+- Updated URI Template dependency
 
 ### 2.1.0  (Warning: There are breaking changes in this version, but 2 was never released)
 - Updated LinkFactory to work with ILink
