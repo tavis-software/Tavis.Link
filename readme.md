@@ -30,7 +30,7 @@ Create a strongly typed link to encapsulate the parameterization of a URI
     var response = httpClient.Send(link.CreateRequest()).Result;
 
 
-Use standard IANA link, a responsehandler the the FollowLinkAsync extension method
+Use standard IANA link, a responsehandler the FollowLinkAsync extension method
     
     var httpClient = new HttpClient();
     var linkFactory = new LinkFactory();
