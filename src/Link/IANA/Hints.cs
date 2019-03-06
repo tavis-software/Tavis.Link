@@ -64,7 +64,7 @@ namespace Tavis.IANA
     {
         public AcceptPostHint()
         {
-            Name = "accept-post";
+            Name = "acceptPost";
             Content = new JObject();
         }
 
@@ -83,7 +83,7 @@ namespace Tavis.IANA
     {
         public AcceptPatchHint()
         {
-            Name = "accept-patch";
+            Name = "acceptPatch";
             Content = new JObject();
         }
         
@@ -102,7 +102,7 @@ namespace Tavis.IANA
     {
         public AcceptRanges()
         {
-            Name = "accept-ranges";
+            Name = "acceptRanges";
         }
     }
 
@@ -110,7 +110,7 @@ namespace Tavis.IANA
     {
         public AcceptPreferHint()
         {
-            Name = "accept-prefer";
+            Name = "acceptPrefer";
             Content = new JArray();
         }
 
@@ -173,6 +173,25 @@ namespace Tavis.IANA
 
                 }
             }
+        }
+    }
+    
+    public class AcceptPutHint : Hint
+    {
+        public AcceptPutHint()
+        {
+            Name = "acceptPut";
+            Content = new JObject();
+        }
+
+        public void AddMediaType(string mediaType, bool deprecated = false)
+        {
+            var content = new JObject();
+            if (deprecated)
+            {
+                content["deprecated"] = true;
+            }
+            Content[mediaType] = content;
         }
     }
 }
